@@ -17,6 +17,9 @@ python scripts/fao_gender_scraper.py --section insights --delay 2.0 --out public
 # Scrape Success Stories, starting at page 3 through 12; defaults to public/
 python scripts/fao_gender_scraper.py --section success-stories --start-page 3 --max-pages 10
 
+# Deep-scrape News: fetch each article and auto-summarize into 3 sentences
+python scripts/fao_gender_scraper.py --section news --max-pages 5 --fetch-article --summarize --summary-sentences 3
+
 # Scrape Publications (use the numeric page in the URL, e.g. 61)
 python scripts/fao_gender_scraper.py --section publications --start-page 61 --max-pages 3
 
@@ -71,6 +74,9 @@ class Item:
     category: str
     url: str
     summary: str
+    # Optional deep-scrape fields
+    article_summary: str = ""
+    article_text: str = ""
 
 
 def make_session() -> requests.Session:
@@ -285,7 +291,68 @@ def categorize_article(title: str, summary: str, section: str) -> str:
     return best_category
 
 
-def scrape(section: str, start_page: int, max_pages: int, delay: float) -> List[Item]:
+def extract_main_text(html: str) -> str:
+    """Extract main article text with heuristic selectors and paragraph join."""
+    soup = BeautifulSoup(html, "html.parser")
+    for sel in [
+        "script", "style", "nav", "header", "footer", "aside", "form", "noscript",
+        "div.share", "div.social", "ul.share-buttons",
+    ]:
+        for n in soup.select(sel):
+            n.decompose()
+
+    candidate_selectors = [
+        "article", "main article", "main .article", "div.article", "div.article-content",
+        "div.entry-content", "div#content", "main", "section.content", "div.content",
+        "div.text", "div#main-content",
+    ]
+    best = ""
+    best_len = 0
+    for sel in candidate_selectors:
+        node = soup.select_one(sel)
+        if not node:
+            continue
+        text = "\n".join([p.get_text(" ", strip=True) for p in node.find_all(["p", "li"])])
+        if len(text) > best_len:
+            best = text
+            best_len = len(text)
+    if not best:
+        best = "\n".join([p.get_text(" ", strip=True) for p in soup.find_all("p")])
+    return normalize_space(best)
+
+
+def summarize_text(text: str, max_sentences: int = 3) -> str:
+    if not text:
+        return ""
+    sentences = re.split(r"(?<=[\.!?])\s+", text)
+    sentences = [s.strip() for s in sentences if s.strip()]
+    if len(sentences) <= max_sentences:
+        return " ".join(sentences)
+
+    stop = set("""
+        a an the and or but if while of for on in at to from by with as is are was were be been being
+        this that those these it its they them their we our you your he she his her not no yes do does did
+    """.split())
+    words = re.findall(r"[A-Za-z']+", text.lower())
+    freq: Dict[str, int] = {}
+    for w in words:
+        if w in stop or len(w) <= 2:
+            continue
+        freq[w] = freq.get(w, 0) + 1
+
+    scores: List[Tuple[int, int]] = []
+    for idx, s in enumerate(sentences):
+        score = 0
+        for w in re.findall(r"[A-Za-z']+", s.lower()):
+            score += freq.get(w, 0)
+        scores.append((score, idx))
+    top = sorted(scores, key=lambda x: x[0], reverse=True)[:max_sentences]
+    top_idx = sorted([i for _, i in top])
+    return " ".join([sentences[i] for i in top_idx])
+
+
+def scrape(section: str, start_page: int, max_pages: int, delay: float,
+           fetch_article: bool = False, summarize: bool = False, summary_sentences: int = 3) -> List[Item]:
     session = make_session()
     results: List[Item] = []
     parser: Callable[[str], List[Tuple[str, str, str, str]]]
@@ -315,6 +382,20 @@ def scrape(section: str, start_page: int, max_pages: int, delay: float) -> List[
             clean_summary = normalize_space(summary)
             date_iso, year, month = parse_date_to_iso(date)
             category = categorize_article(clean_title, clean_summary, section)
+            article_text = ""
+            article_summary = ""
+            if fetch_article and href:
+                try:
+                    aresp = session.get(href, timeout=45)
+                    if aresp.status_code == 200:
+                        article_text = extract_main_text(aresp.text)
+                        if summarize and article_text:
+                            article_summary = summarize_text(article_text, max_sentences=summary_sentences)
+                except Exception:
+                    pass
+            if summarize and not article_summary and clean_summary:
+                article_summary = summarize_text(clean_summary, max_sentences=summary_sentences)
+
             results.append(Item(
                 section=section,
                 page=page,
@@ -326,6 +407,8 @@ def scrape(section: str, start_page: int, max_pages: int, delay: float) -> List[
                 category=category,
                 url=href,
                 summary=clean_summary,
+                article_summary=article_summary,
+                article_text=article_text,
             ))
         pages_fetched += 1
         page += 1
@@ -351,6 +434,7 @@ def write_csv(items: List[Item], out_path: str) -> None:
         "category",
         "title",
         "summary",
+        "article_summary",
         "date",
         "date_iso",
         "year",
@@ -402,10 +486,21 @@ def main() -> None:
     ap.add_argument("--json-out", default=None, help=(
         "Optional JSON output path (default: match CSV basename with .json)"
     ))
+    ap.add_argument("--fetch-article", action="store_true", help="Fetch each article page and extract main text")
+    ap.add_argument("--summarize", action="store_true", help="Generate an extractive summary")
+    ap.add_argument("--summary-sentences", type=int, default=3, help="Number of sentences in the summary (default: 3)")
     args = ap.parse_args()
 
     try:
-        items = scrape(section=args.section, start_page=args.start_page, max_pages=args.max_pages, delay=args.delay)
+        items = scrape(
+            section=args.section,
+            start_page=args.start_page,
+            max_pages=args.max_pages,
+            delay=args.delay,
+            fetch_article=args.fetch_article,
+            summarize=args.summarize,
+            summary_sentences=max(1, min(8, args.summary_sentences)),
+        )
     except Exception as e:
         print(f"ERROR: {e}", file=sys.stderr)
         sys.exit(2)
