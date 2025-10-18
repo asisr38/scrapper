@@ -115,9 +115,18 @@ export default function Page() {
   const doughnutOptions = {
     responsive: true,
     maintainAspectRatio: false,
-    cutout: '70%',
+    cutout: '65%',
     plugins: {
-      legend: { position: 'bottom' as const, labels: { color: axisColor, boxWidth: 10, boxHeight: 10 } },
+      legend: { 
+        position: 'bottom' as const, 
+        labels: { 
+          color: axisColor, 
+          boxWidth: 10, 
+          boxHeight: 10,
+          padding: 8,
+          font: { size: 10 }
+        } 
+      },
       tooltip: {
         backgroundColor: 'rgba(17,24,39,0.9)',
         titleColor: '#fff',
@@ -133,12 +142,19 @@ export default function Page() {
     scales: {
       x: {
         grid: { color: gridColor, drawBorder: false },
-        ticks: { color: axisColor, font: { size: 11 } },
+        ticks: { 
+          color: axisColor, 
+          font: { size: 9 },
+          maxRotation: 45,
+          minRotation: 45,
+          autoSkip: true,
+          maxTicksLimit: 12
+        },
         border: { color: borderColor },
       },
       y: {
         grid: { color: gridColor, drawBorder: false },
-        ticks: { color: axisColor, font: { size: 11 }, precision: 0 },
+        ticks: { color: axisColor, font: { size: 9 }, precision: 0 },
         border: { color: borderColor },
         beginAtZero: true,
       },
@@ -182,15 +198,16 @@ export default function Page() {
     scales: {
       x: {
         grid: { color: gridColor, drawBorder: false },
-        ticks: { color: axisColor, font: { size: 12 }, precision: 0 },
+        ticks: { color: axisColor, font: { size: 10 }, precision: 0 },
         border: { color: borderColor },
         beginAtZero: true,
       },
       y: {
         grid: { color: gridColor, drawBorder: false },
-        ticks: { color: axisColor, font: { size: 12 }, callback: (v: any, i: number, ticks: any[]) => {
+        ticks: { color: axisColor, font: { size: 10 }, callback: (v: any, i: number, ticks: any[]) => {
           const label = (catData?.labels?.[i] || '') as string;
-          const maxLen = 42;
+          // Adjust max length based on screen size
+          const maxLen = window.innerWidth < 640 ? 25 : 42;
           return label.length > maxLen ? label.slice(0, maxLen - 1) + '…' : label;
         } },
         border: { color: borderColor },
@@ -208,7 +225,7 @@ export default function Page() {
         },
       },
     },
-  }), []);
+  }), [catData]);
 
   const secData = useMemo(() => {
     if (!agg) return null;
@@ -248,19 +265,34 @@ export default function Page() {
       x: {
         stacked: true,
         grid: { color: gridColor, drawBorder: false },
-        ticks: { color: axisColor, font: { size: 11 } },
+        ticks: { 
+          color: axisColor, 
+          font: { size: 9 },
+          maxRotation: 45,
+          minRotation: 45,
+          autoSkip: true,
+          maxTicksLimit: 12
+        },
         border: { color: borderColor },
       },
       y: {
         stacked: true,
         grid: { color: gridColor, drawBorder: false },
-        ticks: { color: axisColor, font: { size: 11 }, precision: 0 },
+        ticks: { color: axisColor, font: { size: 9 }, precision: 0 },
         border: { color: borderColor },
         beginAtZero: true,
       },
     },
     plugins: {
-      legend: { position: 'bottom' as const },
+      legend: { 
+        position: 'bottom' as const,
+        labels: {
+          font: { size: 10 },
+          padding: 8,
+          boxWidth: 10,
+          boxHeight: 10
+        }
+      },
       tooltip: {
         backgroundColor: 'rgba(17,24,39,0.9)',
         titleColor: '#fff',
@@ -409,18 +441,18 @@ export default function Page() {
 
         {/* Charts Section */}
         <section className="mb-4 sm:mb-6 grid grid-cols-1 lg:grid-cols-3 gap-4">
-          <div className="bg-white rounded-lg shadow p-4 sm:p-6 h-64 sm:h-80">
+          <div className="bg-white rounded-lg shadow p-4 sm:p-6 h-80 sm:h-96">
             <div className="flex items-center justify-between mb-2">
               <h2 className="text-sm font-semibold text-gray-700">{isCategoryFiltered ? 'Sections for Category' : 'Top Categories'}</h2>
             </div>
             {!isCategoryFiltered && catData && <Bar data={catData} options={catBarOptions} />}
             {isCategoryFiltered && sectionBarForCategory && <Bar data={sectionBarForCategory} options={catBarOptions} />}
           </div>
-          <div className="bg-white rounded-lg shadow p-4 sm:p-6 h-64 sm:h-80">
+          <div className="bg-white rounded-lg shadow p-4 sm:p-6 h-80 sm:h-96">
             <h2 className="text-sm font-semibold text-gray-700 mb-2">By Section</h2>
             {secData && <Doughnut data={secData} options={doughnutOptions} />} 
           </div>
-          <div className="bg-white rounded-lg shadow p-4 sm:p-6 h-64 sm:h-80">
+          <div className="bg-white rounded-lg shadow p-4 sm:p-6 h-80 sm:h-96">
             <h2 className="text-sm font-semibold text-gray-700 mb-2">By Month</h2>
             {timeData && <Line data={timeData} options={lineOptions} />} 
           </div>
@@ -428,7 +460,7 @@ export default function Page() {
 
         {/* Monthly Stacked Chart */}
         <section className="mb-4 sm:mb-6 grid grid-cols-1">
-          <div className="bg-white rounded-lg shadow p-4 sm:p-6 h-72 sm:h-96">
+          <div className="bg-white rounded-lg shadow p-4 sm:p-6 h-80 sm:h-96">
             <h2 className="text-sm font-semibold text-gray-700 mb-2">Monthly Items by Section</h2>
             {monthlyStackedData && <Bar data={monthlyStackedData} options={stackedBarOptions} />}
           </div>

@@ -1,5 +1,7 @@
 {
-  "version": 2
+  "buildCommand": "cd dashboard && npm install && npm run build",
+  "outputDirectory": "dashboard/.next",
+  "installCommand": "npm install --prefix ./dashboard"
 }
 
 
