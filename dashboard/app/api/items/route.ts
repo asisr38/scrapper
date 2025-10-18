@@ -38,11 +38,18 @@ export async function GET(req: NextRequest) {
   let rows: Row[] = []
   async function tryRead(pathStr: string): Promise<Row[] | null> {
     try {
-      const raw = await fs.readFile(pathStr, 'utf-8')
-      const parsed: JsonPayload = JSON.parse(raw)
-      const arr = Array.isArray(parsed.items) ? parsed.items : []
-      if (arr.length > 0) return arr
-      return []
+      if (/^https?:\/\//i.test(pathStr)) {
+        const res = await fetch(pathStr)
+        if (!res.ok) return null
+        const parsed: JsonPayload = await res.json()
+        const arr = Array.isArray(parsed.items) ? parsed.items : []
+        return arr
+      } else {
+        const raw = await fs.readFile(pathStr, 'utf-8')
+        const parsed: JsonPayload = JSON.parse(raw)
+        const arr = Array.isArray(parsed.items) ? parsed.items : []
+        return arr
+      }
     } catch {
       return null
     }

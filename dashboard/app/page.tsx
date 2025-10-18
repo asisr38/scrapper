@@ -326,9 +326,11 @@ export default function Page() {
             <label className="block text-xs text-gray-600 mb-1">Section</label>
             <select className="w-full border rounded px-2 py-1" value={filters.section} onChange={e => setFilters(s => ({ ...s, section: e.target.value }))}>
               <option value="">All</option>
-              {Array.from(new Set([...(agg?.facets?.sections || []), 'news', 'insights', 'success-stories', 'e-learning', 'publications']
+              {Array.from(new Set([...(agg?.facets?.sections || []), 'news', 'insights', 'success-stories', 'publications']
                 .filter(Boolean)
-                .map((s) => String(s).toLowerCase()))).map((s) => (
+                .map((s) => String(s).toLowerCase())))
+                .filter((s) => s !== 'e-learning')
+                .map((s) => (
                   <option key={s} value={s}>{formatSectionLabel(s)}</option>
               ))}
             </select>
