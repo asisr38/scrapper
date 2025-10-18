@@ -1,0 +1,11 @@
+{
+  "name": "fao-gender-scrapper",
+  "private": true,
+  "scripts": {
+    "install:dashboard": "cd dashboard && npm install",
+    "build": "cd dashboard && npm run build",
+    "dev": "cd dashboard && npm run dev",
+    "start": "cd dashboard && npm run start"
+  }
+}
+
