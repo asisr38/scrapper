@@ -8,13 +8,13 @@ and E-learnings) and exports to CSV and JSON.
 
 Examples
 --------
-# Scrape the first 10 pages of News; outputs to dashboard/public/news.csv and news.json
+# Scrape the first 10 pages of News; outputs to public/news.csv and news.json
 python scripts/fao_gender_scraper.py --section news --max-pages 10
 
-# Scrape Insights (all pages until empty), 2s delay; explicit output path in dashboard/public
-python scripts/fao_gender_scraper.py --section insights --delay 2.0 --out dashboard/public/insights.csv
+# Scrape Insights (all pages until empty), 2s delay; explicit output path in public/
+python scripts/fao_gender_scraper.py --section insights --delay 2.0 --out public/insights.csv
 
-# Scrape Success Stories, starting at page 3 through 12; defaults to dashboard/public
+# Scrape Success Stories, starting at page 3 through 12; defaults to public/
 python scripts/fao_gender_scraper.py --section success-stories --start-page 3 --max-pages 10
 
 # Scrape Publications (use the numeric page in the URL, e.g. 61)
@@ -22,7 +22,7 @@ python scripts/fao_gender_scraper.py --section publications --start-page 61 --ma
 
 Notes
 -----
-- By default, outputs are written under dashboard/public/<section>.csv and <section>.json.
+- By default, outputs are written under public/<section>.csv and <section>.json.
 - The script sends a desktop-like User-Agent and uses retry logic to reduce 403/5xx errors.
 - If your network blocks automated requests to fao.org, run this script from a different network
   or manually save the HTML and parse locally.
@@ -388,7 +388,7 @@ def write_json(items: List[Item], out_path: str) -> None:
 def main() -> None:
     ap = argparse.ArgumentParser(description=(
         "Scrape FAO Gender paginated sections to CSV/JSON. "
-        "Defaults to writing outputs into dashboard/public/<section>.{csv,json} (repo-relative)."
+        "Defaults to writing outputs into public/<section>.{csv,json} (repo-relative)."
     ))
     ap.add_argument("--section", choices=list(SECTIONS.keys()), default="news",
                     help="Which section to scrape (default: news)")
@@ -397,7 +397,7 @@ def main() -> None:
                     help="Maximum number of pages to fetch (stops early if a page has no items). Default 10.")
     ap.add_argument("--delay", type=float, default=0.8, help="Seconds to sleep between page requests (default: 0.8)")
     ap.add_argument("--out", default=None, help=(
-        "Output CSV path. If omitted, writes to dashboard/public/<section>.csv"
+        "Output CSV path. If omitted, writes to public/<section>.csv"
     ))
     ap.add_argument("--json-out", default=None, help=(
         "Optional JSON output path (default: match CSV basename with .json)"
@@ -413,14 +413,14 @@ def main() -> None:
     if not items:
         print("No items scraped. Try reducing delay, increasing max-pages, or running from a different network.")
     else:
-        # Determine output paths; default to repoRoot/dashboard/public/<section>.csv
+        # Determine output paths; default to repoRoot/public/<section>.csv
         out_path = args.out
         if not out_path:
             # Resolve repository root relative to this script's directory
             script_dir = os.path.dirname(os.path.abspath(__file__))
             repo_root = os.path.dirname(script_dir)
             out_filename = f"{args.section}.csv"
-            out_path = os.path.join(repo_root, "dashboard", "public", out_filename)
+            out_path = os.path.join(repo_root, "public", out_filename)
 
         write_csv(items, out_path)
         # Derive JSON path if not provided
