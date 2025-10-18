@@ -9,16 +9,16 @@ and E-learnings) and exports to CSV and JSON.
 Examples
 --------
 # Scrape the first 10 pages of News; outputs to dashboard/public/news.csv and news.json
-python fao_gender_scraper.py --section news --max-pages 10
+python scripts/fao_gender_scraper.py --section news --max-pages 10
 
 # Scrape Insights (all pages until empty), 2s delay; explicit output path in dashboard/public
-python fao_gender_scraper.py --section insights --delay 2.0 --out dashboard/public/insights.csv
+python scripts/fao_gender_scraper.py --section insights --delay 2.0 --out dashboard/public/insights.csv
 
 # Scrape Success Stories, starting at page 3 through 12; defaults to dashboard/public
-python fao_gender_scraper.py --section success-stories --start-page 3 --max-pages 10
+python scripts/fao_gender_scraper.py --section success-stories --start-page 3 --max-pages 10
 
 # Scrape Publications (use the numeric page in the URL, e.g. 61)
-python fao_gender_scraper.py --section publications --start-page 61 --max-pages 3
+python scripts/fao_gender_scraper.py --section publications --start-page 61 --max-pages 3
 
 Notes
 -----
@@ -388,7 +388,7 @@ def write_json(items: List[Item], out_path: str) -> None:
 def main() -> None:
     ap = argparse.ArgumentParser(description=(
         "Scrape FAO Gender paginated sections to CSV/JSON. "
-        "Defaults to writing outputs into dashboard/public/<section>.{csv,json}."
+        "Defaults to writing outputs into dashboard/public/<section>.{csv,json} (repo-relative)."
     ))
     ap.add_argument("--section", choices=list(SECTIONS.keys()), default="news",
                     help="Which section to scrape (default: news)")
@@ -413,11 +413,14 @@ def main() -> None:
     if not items:
         print("No items scraped. Try reducing delay, increasing max-pages, or running from a different network.")
     else:
-        # Determine output paths; default to dashboard/public/<section>.csv
+        # Determine output paths; default to repoRoot/dashboard/public/<section>.csv
         out_path = args.out
         if not out_path:
+            # Resolve repository root relative to this script's directory
+            script_dir = os.path.dirname(os.path.abspath(__file__))
+            repo_root = os.path.dirname(script_dir)
             out_filename = f"{args.section}.csv"
-            out_path = os.path.join("dashboard", "public", out_filename)
+            out_path = os.path.join(repo_root, "dashboard", "public", out_filename)
 
         write_csv(items, out_path)
         # Derive JSON path if not provided
