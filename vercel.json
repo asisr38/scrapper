@@ -1,10 +1,5 @@
 {
-  "version": 2,
-  "framework": "nextjs",
-  "installCommand": "cd dashboard && npm install",
-  "buildCommand": "cd dashboard && npm run build",
-  "devCommand": "cd dashboard && npm run dev",
-  "ignoreCommand": "git diff --quiet HEAD^ HEAD -- dashboard"
+  "version": 2
 }
 
 
