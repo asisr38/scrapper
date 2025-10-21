@@ -24,22 +24,4 @@ export function ChartContainer({
     </div>
   )
 }
-
-export function ChartTooltipContent({ hideLabel, indicator }: { hideLabel?: boolean; indicator?: "line" | "dot" }) {
-  return (
-    <div className="rounded-md border bg-background px-3 py-2 text-sm shadow-sm">
-      <div className="flex items-center gap-2">
-        {!hideLabel && <span className="font-medium">Value</span>}
-        {indicator === "line" ? (
-          <span className="h-3 w-3 bg-foreground" />
-        ) : (
-          <span className="h-2 w-2 rounded-full bg-foreground" />
-        )}
-      </div>
-    </div>
-  )
-}
-
-export const ChartTooltip = ({ children }: React.PropsWithChildren) => <>{children}</>
-
-
+ 

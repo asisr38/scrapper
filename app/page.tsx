@@ -1,20 +1,7 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from 'react';
-import {
-  Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  BarElement,
-  ArcElement,
-  LineElement,
-  PointElement,
-  Tooltip,
-  Legend,
-  Filler,
-} from 'chart.js';
-import { Bar, Doughnut, Line } from 'react-chartjs-2';
-import { Pie, PieChart as RPieChart, Label as RechartsLabel, Bar as RBar, BarChart as RBarChart, CartesianGrid as RCartesianGrid, XAxis as RXAxis, YAxis as RYAxis, LabelList as RLabelList, LineChart as RLineChart, Line as RLine, Tooltip as RTooltip, ResponsiveContainer as RResponsiveContainer, Cell as RCell } from 'recharts';
+import { useEffect, useMemo, useState } from 'react';
+import { Pie, PieChart as RPieChart, Label as RechartsLabel, Bar as RBar, BarChart as RBarChart, CartesianGrid as RCartesianGrid, XAxis as RXAxis, YAxis as RYAxis, LineChart as RLineChart, Line as RLine, Tooltip as RTooltip, ResponsiveContainer as RResponsiveContainer, Cell as RCell } from 'recharts';
 import { ChartContainer } from '@/components/ui/chart';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -27,7 +14,7 @@ import { Label } from '@/components/ui/label';
 import { Filter, BarChart3, PieChart, TrendingUp, FileText, Clock, Database, Search, X } from 'lucide-react';
 import { formatDateRange } from 'little-date';
 
-ChartJS.register(CategoryScale, LinearScale, BarElement, ArcElement, LineElement, PointElement, Tooltip, Legend, Filler);
+ 
 
 type Aggregations = {
   csv_path: string;
@@ -49,9 +36,7 @@ const palette = [
   '#06b6d4', '#f97316', '#84cc16', '#ec4899', '#6366f1',
 ];
 
-const gridColor = 'rgba(0,0,0,0.05)';
-const axisColor = '#64748b';
-const borderColor = 'rgba(0,0,0,0.08)';
+ 
 
 export default function Page() {
   const [csvPath, setCsvPath] = useState<string>('');
@@ -62,9 +47,6 @@ export default function Page() {
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const isCategoryFiltered = !!filters.category;
-  const secChartRef = useRef<any>(null);
-  const catChartRef = useRef<any>(null);
   const [dateRange, setDateRange] = useState<DateRange | undefined>(undefined);
   const dataYears = useMemo(() => {
     const labels = agg?.by_year_month?.labels || [];
@@ -85,29 +67,7 @@ export default function Page() {
     return palette[hash % palette.length];
   };
 
-  const handleSectionPieClick = (event: any) => {
-    const chart = secChartRef.current;
-    const nativeEvent = event?.native || event;
-    if (!chart || !nativeEvent) return;
-    const points = chart.getElementsAtEventForMode(nativeEvent, 'nearest', { intersect: true }, true);
-    if (!points?.length) return;
-    const idx = points[0].index;
-    const label = secData?.labels?.[idx] || '';
-    const value = String(label).toLowerCase();
-    setFilters((s) => ({ ...s, section: s.section === value ? '' : value }));
-  };
-
-  const handleCategoryBarClick = (event: any) => {
-    const chart = catChartRef.current;
-    const nativeEvent = event?.native || event;
-    if (!chart || !nativeEvent) return;
-    const points = chart.getElementsAtEventForMode(nativeEvent, 'nearest', { intersect: true }, true);
-    if (!points?.length) return;
-    const idx = points[0].index;
-    const label = catData?.labels?.[idx] || '';
-    const value = String(label).toLowerCase();
-    setFilters((s) => ({ ...s, category: s.category === value ? '' : value }));
-  };
+ 
 
   const formatSectionLabel = (val: string) => {
     const v = (val || '').toLowerCase();
@@ -175,314 +135,7 @@ export default function Page() {
     fetchData();
   }, [filters, pagination]);
 
-  const barOptions = {
-    responsive: true,
-    maintainAspectRatio: false,
-    scales: {
-      x: {
-        grid: { color: gridColor, drawBorder: false },
-        ticks: { color: axisColor, font: { size: 16, weight: 500 } },
-        border: { color: borderColor },
-      },
-      y: {
-        grid: { color: gridColor, drawBorder: false },
-        ticks: { color: axisColor, font: { size: 16, weight: 500 }, precision: 0 },
-        border: { color: borderColor },
-        beginAtZero: true,
-      },
-    },
-    plugins: {
-      legend: { display: false },
-      tooltip: {
-        backgroundColor: 'rgba(17,24,39,0.9)',
-        titleColor: '#fff',
-        bodyColor: '#e5e7eb',
-        displayColors: false,
-        titleFont: { size: 16, weight: 600 },
-        bodyFont: { size: 15, weight: 500 },
-      },
-    },
-    elements: {
-      bar: {
-        borderRadius: 6,
-        borderSkipped: false,
-      }
-    },
-  } as const;
-
-  const doughnutOptions = {
-    responsive: true,
-    maintainAspectRatio: false,
-    cutout: '50%',
-    plugins: {
-      legend: { 
-        position: 'bottom' as const, 
-        labels: { 
-          color: axisColor, 
-          boxWidth: 18, 
-          boxHeight: 18,
-          padding: 20,
-          font: { size: 16, weight: 500 }
-        } 
-      },
-      tooltip: {
-        backgroundColor: 'rgba(17,24,39,0.9)',
-        titleColor: '#fff',
-        bodyColor: '#e5e7eb',
-        displayColors: true,
-        titleFont: { size: 16, weight: 600 },
-        bodyFont: { size: 15, weight: 500 },
-        callbacks: {
-          label: function(context: any) {
-            const label = context.label || '';
-            const value = context.parsed;
-            const total = context.dataset.data.reduce((a: number, b: number) => a + b, 0);
-            const percentage = ((value / total) * 100).toFixed(1);
-            return `${label}: ${value} (${percentage}%)`;
-          }
-        }
-      },
-    },
-  };
-
-  const lineOptions = {
-    responsive: true,
-    maintainAspectRatio: false,
-    scales: {
-      x: {
-        grid: { color: gridColor, drawBorder: false },
-        ticks: { 
-          color: axisColor, 
-          font: { size: 15, weight: 500 },
-          maxRotation: 45,
-          minRotation: 45,
-          autoSkip: true,
-          maxTicksLimit: 15
-        },
-        border: { color: borderColor },
-      },
-      y: {
-        grid: { color: gridColor, drawBorder: false },
-        ticks: { color: axisColor, font: { size: 15, weight: 500 }, precision: 0 },
-        border: { color: borderColor },
-        beginAtZero: true,
-      },
-    },
-    plugins: {
-      legend: { display: false },
-      tooltip: {
-        backgroundColor: 'rgba(17,24,39,0.9)',
-        titleColor: '#fff',
-        bodyColor: '#e5e7eb',
-        displayColors: false,
-        titleFont: { size: 16, weight: 600 },
-        bodyFont: { size: 15, weight: 500 },
-      },
-    },
-    elements: {
-      point: {
-        radius: 6,
-        hoverRadius: 8,
-        borderWidth: 3,
-      },
-      line: {
-        borderWidth: 4,
-        tension: 0.4,
-      }
-    },
-  } as const;
-
-  const catData = useMemo(() => {
-    if (!agg) return null;
-    const topN = 8;
-    const sorted = [...agg.by_category].sort((a, b) => b.count - a.count);
-    const top = sorted.slice(0, topN);
-    const others = sorted.slice(topN);
-    const othersTotal = others.reduce((sum, d) => sum + d.count, 0);
-    const labels = [...top.map(d => d.label), ...(othersTotal > 0 ? ['Others'] : [])];
-    const counts = [...top.map(d => d.count), ...(othersTotal > 0 ? [othersTotal] : [])];
-    return {
-      labels,
-      datasets: [{
-        label: 'Items',
-        data: counts,
-        backgroundColor: labels.map((_, i) => palette[i % palette.length] + 'CC'),
-        borderColor: labels.map((_, i) => palette[i % palette.length]),
-        borderWidth: 1,
-      }]
-    };
-  }, [agg]);
-
-  const catBarOptions = useMemo(() => ({
-    responsive: true,
-    maintainAspectRatio: false,
-    indexAxis: 'y' as const,
-    scales: {
-      x: {
-        grid: { color: gridColor, drawBorder: false },
-        ticks: { color: axisColor, font: { size: 16, weight: 500 }, precision: 0 },
-        border: { color: borderColor },
-        beginAtZero: true,
-      },
-      y: {
-        grid: { color: gridColor, drawBorder: false },
-        ticks: { color: axisColor, font: { size: 15, weight: 500 }, callback: (v: any, i: number, ticks: any[]) => {
-          const label = (catData?.labels?.[i] || '') as string;
-          // Adjust max length based on screen size
-          const maxLen = window.innerWidth < 640 ? 40 : 70;
-          return label.length > maxLen ? label.slice(0, maxLen - 1) + '…' : label;
-        } },
-        border: { color: borderColor },
-      },
-    },
-    plugins: {
-      legend: { display: false },
-      tooltip: {
-        backgroundColor: 'rgba(17,24,39,0.9)',
-        titleColor: '#fff',
-        bodyColor: '#e5e7eb',
-        displayColors: true,
-        titleFont: { size: 16, weight: 600 },
-        bodyFont: { size: 15, weight: 500 },
-        callbacks: {
-          title: (items: any[]) => items?.[0]?.label || '',
-          label: function(context: any) {
-            return `Count: ${context.parsed.x}`;
-          }
-        },
-      },
-    },
-    elements: {
-      bar: {
-        borderRadius: 6,
-        borderSkipped: false,
-      }
-    },
-  }), [catData]);
-
-  const secData = useMemo(() => {
-    if (!agg) return null;
-    const labels = agg.by_section.map(d => d.label);
-    const counts = agg.by_section.map(d => d.count);
-    return {
-      labels,
-      datasets: [{
-        data: counts,
-        backgroundColor: labels.map((_, i) => palette[i % palette.length] + 'CC'),
-        borderWidth: 0,
-        hoverOffset: 8,
-        spacing: 2,
-      }]
-    };
-  }, [agg]);
-
-  const monthlyStackedData = useMemo(() => {
-    if (!agg || !agg.monthly_by_section) return null;
-    const labels = agg.monthly_by_section.labels;
-    const sections = Object.keys(agg.monthly_by_section.series).sort();
-    const datasets = sections.map((sec, i) => ({
-      label: sec,
-      data: agg.monthly_by_section!.series[sec],
-      backgroundColor: (palette[i % palette.length] + 'B3'),
-      borderColor: palette[i % palette.length],
-      borderWidth: 1,
-      stack: 'sections',
-    }));
-    return { labels, datasets };
-  }, [agg]);
-
-  const stackedBarOptions = useMemo(() => ({
-    responsive: true,
-    maintainAspectRatio: false,
-    scales: {
-      x: {
-        stacked: true,
-        grid: { color: gridColor, drawBorder: false },
-        ticks: { 
-          color: axisColor, 
-          font: { size: 15, weight: 500 },
-          maxRotation: 45,
-          minRotation: 45,
-          autoSkip: true,
-          maxTicksLimit: 12
-        },
-        border: { color: borderColor },
-      },
-      y: {
-        stacked: true,
-        grid: { color: gridColor, drawBorder: false },
-        ticks: { color: axisColor, font: { size: 15, weight: 500 }, precision: 0 },
-        border: { color: borderColor },
-        beginAtZero: true,
-      },
-    },
-    plugins: {
-      legend: { 
-        position: 'bottom' as const,
-        labels: {
-          font: { size: 16, weight: 500 },
-          padding: 16,
-          boxWidth: 16,
-          boxHeight: 16
-        }
-      },
-      tooltip: {
-        backgroundColor: 'rgba(17,24,39,0.9)',
-        titleColor: '#fff',
-        bodyColor: '#e5e7eb',
-        displayColors: true,
-        titleFont: { size: 16, weight: 600 },
-        bodyFont: { size: 15, weight: 500 },
-      },
-    },
-  }), []);
-
-  const sectionBarForCategory = useMemo(() => {
-    if (!agg) return null;
-    const labels = agg.by_section.map(d => d.label);
-    const counts = agg.by_section.map(d => d.count);
-    return {
-      labels,
-      datasets: [{
-        label: 'Items',
-        data: counts,
-        backgroundColor: labels.map((_, i) => palette[i % palette.length] + 'CC'),
-        borderColor: labels.map((_, i) => palette[i % palette.length]),
-        borderWidth: 1,
-      }]
-    };
-  }, [agg]);
-
-  const timeData = useMemo(() => {
-    if (!agg) return null;
-    const labels = agg.by_year_month.labels;
-    const counts = agg.by_year_month.counts;
-    return {
-      labels,
-      datasets: [{
-        label: 'Items',
-        data: counts,
-        borderColor: '#2563eb',
-        backgroundColor: (ctx: any) => {
-          const { chart } = ctx;
-          const { ctx: c, chartArea } = chart;
-          if (!chartArea) return '#93c5fd66';
-          const gradient = c.createLinearGradient(0, chartArea.top, 0, chartArea.bottom);
-          gradient.addColorStop(0, 'rgba(37,99,235,0.3)');
-          gradient.addColorStop(1, 'rgba(37,99,235,0.1)');
-          return gradient;
-        },
-        pointRadius: 5,
-        pointHoverRadius: 8,
-        pointBackgroundColor: '#2563eb',
-        pointBorderColor: '#ffffff',
-        pointBorderWidth: 2,
-        borderWidth: 4,
-        tension: 0.4,
-        fill: true,
-      }]
-    };
-  }, [agg]);
+ 
 
   const LoadingSpinner = () => (
     <div className="flex items-center justify-center p-8">
@@ -515,7 +168,7 @@ export default function Page() {
                   <BarChart3 className="w-5 h-5 text-primary-foreground" />
                 </div>
                 <div>
-                  <CardTitle className="text-2xl sm:text-3xl font-bold">FAO Gender Dashboard</CardTitle>
+                  <CardTitle className="text-xl sm:text-2xl font-bold">FAO Gender Dashboard</CardTitle>
                   <div className="flex items-center gap-2 text-sm text-muted-foreground">
                     <Database className="w-3 h-3" />
                     <span className="font-mono text-xs bg-muted px-2 py-0.5 rounded">{csvPath || 'default dataset'}</span>
@@ -552,14 +205,14 @@ export default function Page() {
 
         {/* Filters Section */}
           <CardContent id="mobile-filters" className={`pt-0 ${mobileFiltersOpen ? 'block' : 'hidden'} lg:block`}>
-            <div className="space-y-4">
+            <div className="space-y-3 sm:space-y-4">
               {/* Main Filters Row */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-2 sm:gap-3">
             <div>
-                  <Label htmlFor="section" className="text-sm font-semibold">Section</Label>
+                  <Label htmlFor="section" className="text-[13px] sm:text-sm font-medium">Section</Label>
                   <select 
                     id="section"
-                    className="w-full mt-1 border border-input rounded-md px-3 py-2 text-base focus:ring-2 focus:ring-ring focus:border-ring transition-colors bg-background" 
+                    className="w-full mt-1 border border-input rounded-md px-3 py-2 text-[15px] sm:text-base focus:ring-2 focus:ring-ring focus:border-ring transition-colors bg-background" 
                     value={filters.section} 
                     onChange={e => setFilters(s => ({ ...s, section: e.target.value }))}
                     aria-label="Filter by section"
@@ -575,10 +228,10 @@ export default function Page() {
               </select>
             </div>
             <div>
-                  <Label htmlFor="category" className="text-sm font-semibold">Category</Label>
+                  <Label htmlFor="category" className="text-[13px] sm:text-sm font-medium">Category</Label>
                   <select 
                     id="category"
-                    className="w-full mt-1 border border-input rounded-md px-3 py-2 text-base focus:ring-2 focus:ring-ring focus:border-ring transition-colors bg-background" 
+                    className="w-full mt-1 border border-input rounded-md px-3 py-2 text-[15px] sm:text-base focus:ring-2 focus:ring-ring focus:border-ring transition-colors bg-background" 
                     value={filters.category} 
                     onChange={e => setFilters(s => ({ ...s, category: e.target.value }))}
                     aria-label="Filter by category"
@@ -588,11 +241,11 @@ export default function Page() {
               </select>
             </div>
                 <div className="sm:col-span-2 lg:col-span-2">
-                  <Label htmlFor="search" className="text-sm font-semibold">Search</Label>
+                  <Label htmlFor="search" className="text-[13px] sm:text-sm font-medium">Search</Label>
                   <div className="relative mt-1">
                     <Input 
                       id="search"
-                      className="pl-9 h-10 text-base" 
+                      className="pl-9 h-10 text-[15px]" 
                       placeholder="Search content..." 
                       value={filters.q} 
                       onChange={e => setFilters(s => ({ ...s, q: e.target.value }))}
@@ -602,14 +255,14 @@ export default function Page() {
                   </div>
             </div>
                 <div className="lg:col-span-2">
-                  <Label htmlFor="dates" className="text-sm font-semibold">Date Range</Label>
+                  <Label htmlFor="dates" className="text-[13px] sm:text-sm font-medium">Date Range</Label>
                   <div className="mt-1">
                     <Popover>
                       <PopoverTrigger asChild>
                         <Button
                           variant="outline"
                           id="dates"
-                          className="w-full justify-between font-normal h-10"
+                          className="w-full justify-between font-normal h-10 text-[15px]"
                         >
                           {dateRange?.from && dateRange?.to
                             ? formatDateRange(dateRange.from, dateRange.to, { includeTime: false })
@@ -643,7 +296,7 @@ export default function Page() {
           </div>
               
               {/* Quick Presets & Clear */}
-              <div className="flex flex-wrap items-center justify-between gap-3 pt-3 border-t">
+              <div className="flex flex-wrap items-center justify-between gap-2 sm:gap-3 pt-3 border-t">
                 <div className="flex flex-wrap gap-1">
                   <Button
                     variant="outline"
@@ -715,12 +368,11 @@ export default function Page() {
                     This Year
                   </Button>
                 </div>
-                
-          {(filters.section || filters.category || filters.q || filters.startYm || filters.endYm) && (
+                {(filters.section || filters.category || filters.q || filters.startYm || filters.endYm) && (
                   <Button
                     variant="ghost"
                     size="sm"
-              onClick={() => { setFilters({ section: '', category: '', q: '', startYm: '', endYm: '' }); setPagination(p => ({ ...p, offset: 0 })); setMobileFiltersOpen(false); }}
+                    onClick={() => { setFilters({ section: '', category: '', q: '', startYm: '', endYm: '' }); setPagination(p => ({ ...p, offset: 0 })); setMobileFiltersOpen(false); }}
                     className="text-destructive hover:text-destructive h-7 px-2 text-xs"
                   >
                     <X className="w-3 h-3 mr-1" />
@@ -728,6 +380,52 @@ export default function Page() {
                   </Button>
                 )}
               </div>
+
+              {/* Active filter chips (sticky on mobile) */}
+              {(filters.section || filters.category || filters.q || filters.startYm || filters.endYm) && (
+                <div className="md:static md:bg-transparent md:shadow-none md:backdrop-blur-0 md:py-0 md:mt-3 sticky top-0 z-30 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80 py-2 mt-3 -mx-4 px-4 sm:m-0 sm:p-0 flex flex-wrap gap-2">
+                  {filters.section && (
+                    <button
+                      className="px-2 py-1 rounded-full bg-blue-50 text-blue-700 text-xs flex items-center gap-1"
+                      onClick={() => setFilters((s)=>({ ...s, section: '' }))}
+                      aria-label="Clear section filter"
+                    >
+                      Section: {formatSectionLabel(filters.section)}
+                      <X className="w-3 h-3" />
+                    </button>
+                  )}
+                  {filters.category && (
+                    <button
+                      className="px-2 py-1 rounded-full bg-emerald-50 text-emerald-700 text-xs flex items-center gap-1"
+                      onClick={() => setFilters((s)=>({ ...s, category: '' }))}
+                      aria-label="Clear category filter"
+                    >
+                      Category: {filters.category}
+                      <X className="w-3 h-3" />
+                    </button>
+                  )}
+                  {filters.q && (
+                    <button
+                      className="px-2 py-1 rounded-full bg-zinc-100 text-zinc-700 text-xs flex items-center gap-1"
+                      onClick={() => setFilters((s)=>({ ...s, q: '' }))}
+                      aria-label="Clear search filter"
+                    >
+                      Search: {filters.q}
+                      <X className="w-3 h-3" />
+                    </button>
+                  )}
+                  {(filters.startYm || filters.endYm) && (
+                    <button
+                      className="px-2 py-1 rounded-full bg-purple-50 text-purple-700 text-xs flex items-center gap-1"
+                      onClick={() => setFilters((s)=>({ ...s, startYm: '', endYm: '' }))}
+                      aria-label="Clear date range filter"
+                    >
+                      {filters.startYm || '…'} – {filters.endYm || '…'}
+                      <X className="w-3 h-3" />
+                    </button>
+                  )}
+                </div>
+              )}
             </div>
           </CardContent>
         </Card>
@@ -735,16 +433,16 @@ export default function Page() {
         {error && <ErrorMessage message={error} />}
 
         {/* Enhanced Stats Cards */}
-        <div className="mb-8 grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+        <div className="mb-6 grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
           <Card className="hover:shadow-lg transition-shadow duration-200">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-base text-muted-foreground mb-2 font-medium">Total Items</p>
-                  <p className="text-3xl sm:text-4xl font-bold">{agg?.total ?? 0}</p>
+                  <p className="text-sm sm:text-base text-muted-foreground mb-2 font-medium">Total Items</p>
+                  <p className="text-2xl sm:text-3xl font-bold">{agg?.total ?? 0}</p>
                 </div>
-                <div className="w-16 h-16 bg-primary/10 rounded-xl flex items-center justify-center">
-                  <FileText className="w-8 h-8 text-primary" />
+                <div className="w-12 h-12 sm:w-16 sm:h-16 bg-primary/10 rounded-xl flex items-center justify-center">
+                  <FileText className="w-6 h-6 sm:w-8 sm:h-8 text-primary" />
                 </div>
               </div>
             </CardContent>
@@ -753,24 +451,11 @@ export default function Page() {
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-base text-muted-foreground mb-2 font-medium">Sections</p>
-                  <p className="text-3xl sm:text-4xl font-bold">{agg?.facets?.sections?.length ?? 0}</p>
+                  <p className="text-sm sm:text-base text-muted-foreground mb-2 font-medium">Sections</p>
+                  <p className="text-2xl sm:text-3xl font-bold">{agg?.facets?.sections?.length ?? 0}</p>
                 </div>
-                <div className="w-16 h-16 bg-green-500/10 rounded-xl flex items-center justify-center">
-                  <BarChart3 className="w-8 h-8 text-green-600" />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-          <Card className="hover:shadow-lg transition-shadow duration-200">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-base text-muted-foreground mb-2 font-medium">Categories</p>
-                  <p className="text-3xl sm:text-4xl font-bold">{agg?.facets?.categories?.length ?? 0}</p>
-                </div>
-                <div className="w-16 h-16 bg-orange-500/10 rounded-xl flex items-center justify-center">
-                  <PieChart className="w-8 h-8 text-orange-600" />
+                <div className="w-12 h-12 sm:w-16 sm:h-16 bg-green-500/10 rounded-xl flex items-center justify-center">
+                  <BarChart3 className="w-6 h-6 sm:w-8 sm:h-8 text-green-600" />
                 </div>
               </div>
             </CardContent>
@@ -779,12 +464,25 @@ export default function Page() {
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-base text-muted-foreground mb-2 font-medium">Time Period</p>
-                  <p className="text-3xl sm:text-4xl font-bold">{agg?.by_year_month?.labels?.length ?? 0}</p>
+                  <p className="text-sm sm:text-base text-muted-foreground mb-2 font-medium">Categories</p>
+                  <p className="text-2xl sm:text-3xl font-bold">{agg?.facets?.categories?.length ?? 0}</p>
+                </div>
+                <div className="w-12 h-12 sm:w-16 sm:h-16 bg-orange-500/10 rounded-xl flex items-center justify-center">
+                  <PieChart className="w-6 h-6 sm:w-8 sm:h-8 text-orange-600" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+          <Card className="hover:shadow-lg transition-shadow duration-200">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm sm:text-base text-muted-foreground mb-2 font-medium">Time Period</p>
+                  <p className="text-2xl sm:text-3xl font-bold">{agg?.by_year_month?.labels?.length ?? 0}</p>
                   <p className="text-sm text-muted-foreground mt-1">months</p>
           </div>
-                <div className="w-16 h-16 bg-purple-500/10 rounded-xl flex items-center justify-center">
-                  <Clock className="w-8 h-8 text-purple-600" />
+                <div className="w-12 h-12 sm:w-16 sm:h-16 bg-purple-500/10 rounded-xl flex items-center justify-center">
+                  <Clock className="w-6 h-6 sm:w-8 sm:h-8 text-purple-600" />
           </div>
           </div>
             </CardContent>
@@ -792,23 +490,20 @@ export default function Page() {
           </div>
 
         {/* Single Row Visuals: Section Overview (Pie via Recharts) + Radar (Recharts) */}
-        <div className="mb-8 grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <div className="mb-6 grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-8">
           {/* Sections Overview Pie (Recharts) */}
-          <Card className="h-[28rem] lg:h-[32rem]">
-            <CardHeader className="pb-3">
+          <Card>
+            <CardHeader className="pb-2">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <div className="w-6 h-6 bg-green-500/10 rounded-lg flex items-center justify-center">
                     <PieChart className="w-4 h-4 text-green-600" />
                   </div>
-                  <CardTitle className="text-xl font-semibold">Sections Overview</CardTitle>
+                  <CardTitle className="text-base sm:text-xl font-semibold">Sections Overview</CardTitle>
                 </div>
-                {filters.section && (
-                  <Button variant="ghost" size="sm" onClick={() => setFilters((s) => ({ ...s, section: '' }))} aria-label="Clear section filter" className="text-destructive hover:text-destructive">Clear</Button>
-                )}
               </div>
             </CardHeader>
-            <CardContent className="pt-0">
+            <CardContent className="pt-0 px-2 sm:px-4">
               {isLoading ? (
                 <LoadingSpinner />
               ) : (
@@ -817,9 +512,10 @@ export default function Page() {
                   const data = (agg?.by_section || []).map((d) => ({ name: d.label, value: d.count, fill: getStableColor(String(d.label)) }))
                   const total = data.reduce((a, c) => a + c.value, 0)
                   return (
-                    <div className="mx-auto max-w-full">
-                      <RResponsiveContainer width="100%" aspect={1}>
-                        <RPieChart>
+                    <div className="mx-auto max-w-full overflow-hidden rounded-md">
+                      <div className="h-[16rem] sm:h-[20rem] lg:h-[24rem]">
+                        <RResponsiveContainer width="100%" height="100%">
+                         <RPieChart margin={{ top: 12, right: 12, bottom: 12, left: 12 }}>
                         <RTooltip formatter={(value: any, _name: any, item: any) => {
                           return [String(value), item?.payload?.name || ''];
                         }} />
@@ -827,7 +523,8 @@ export default function Page() {
                           data={data}
                           dataKey="value"
                           nameKey="name"
-                          innerRadius={80}
+                              innerRadius={65}
+                              outerRadius={"75%"}
                           strokeWidth={4}
                         >
                           {data.map((entry, index) => (
@@ -837,9 +534,9 @@ export default function Page() {
                             content={({ viewBox }: any) => {
                               if (viewBox && 'cx' in viewBox && 'cy' in viewBox) {
                                 return (
-                                  <text x={viewBox.cx} y={viewBox.cy} textAnchor="middle" dominantBaseline="middle">
-                                    <tspan x={viewBox.cx} y={viewBox.cy} className="fill-foreground text-3xl font-bold">{total}</tspan>
-                                    <tspan x={viewBox.cx} y={(viewBox.cy || 0) + 22} className="fill-muted-foreground">items</tspan>
+                                    <text x={viewBox.cx} y={viewBox.cy} textAnchor="middle" dominantBaseline="middle" className="scale-90 sm:scale-100">
+                                      <tspan x={viewBox.cx} y={viewBox.cy} className="fill-foreground text-2xl sm:text-3xl font-bold">{total}</tspan>
+                                      <tspan x={viewBox.cx} y={(viewBox.cy || 0) + 18} className="fill-muted-foreground text-xs sm:text-sm">items</tspan>
                                   </text>
                                 )
                               }
@@ -848,7 +545,17 @@ export default function Page() {
                           />
                           </Pie>
                         </RPieChart>
-                      </RResponsiveContainer>
+                        </RResponsiveContainer>
+                      </div>
+                      {/* Mobile legend */}
+                      <div className="mt-3 sm:hidden text-xs text-muted-foreground flex flex-wrap gap-2">
+                        {data.slice(0, 6).map((d, i) => (
+                          <span key={i} className="inline-flex items-center gap-1">
+                            <span className="inline-block w-2.5 h-2.5 rounded" style={{ backgroundColor: d.fill }} />
+                            {formatSectionLabel(String(d.name))}
+                          </span>
+                        ))}
+                      </div>
                     </div>
                   )
                 })()
@@ -857,18 +564,18 @@ export default function Page() {
           </Card>
 
           {/* Category Coverage Bar (Recharts) */}
-          <Card className="h-[28rem] lg:h-[32rem]">
-            <CardHeader className="pb-3">
+          <Card>
+            <CardHeader className="pb-2">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <div className="w-6 h-6 bg-primary/10 rounded-lg flex items-center justify-center">
                     <TrendingUp className="w-4 h-4 text-primary" />
                   </div>
-                  <CardTitle className="text-xl font-semibold">Category Coverage</CardTitle>
+                  <CardTitle className="text-base sm:text-xl font-semibold">Category Coverage</CardTitle>
                 </div>
               </div>
             </CardHeader>
-            <CardContent className="pt-0">
+            <CardContent className="pt-0 px-2 sm:px-4">
               {isLoading ? (
                 <LoadingSpinner />
               ) : (
@@ -882,22 +589,26 @@ export default function Page() {
                     ])
                   ) as any
                   return (
-                    <ChartContainer config={config} className="mx-auto w-full">
-                      <RResponsiveContainer width="100%" height={360}>
-                        <RBarChart data={data} layout="vertical" margin={{ right: 16, left: 8 }}>
-                          <RCartesianGrid horizontal={false} />
-                          <RYAxis dataKey="label" type="category" tickLine={false} tickMargin={10} axisLine={false} hide />
-                          <RXAxis dataKey="value" type="number" hide />
-                          <RTooltip 
-                            formatter={(value: any) => [String(value), 'Items']}
-                            labelFormatter={(_label: any, payload: any) => {
-                              const p = Array.isArray(payload) ? payload[0] : payload;
-                              return String(p?.payload?.label || '');
-                            }}
-                          />
-                          <RBar dataKey="value" radius={4} />
-                        </RBarChart>
-                      </RResponsiveContainer>
+                    <ChartContainer config={config} className="mx-auto w-full overflow-hidden rounded-md">
+                      <div className="h-[16rem] sm:h-[20rem] lg:h-[24rem]">
+                        <RResponsiveContainer width="100%" height="100%">
+                          <RBarChart data={data} layout="vertical" margin={{ right: 12, left: 12 }} barCategoryGap={"30%"}>
+                            <RCartesianGrid horizontal={false} />
+                            <RYAxis dataKey="label" type="category" tickLine={false} tickMargin={10} axisLine={false} hide />
+                            <RXAxis dataKey="value" type="number" hide />
+                            <RTooltip 
+                              formatter={(value: any) => [String(value), 'Items']}
+                              labelFormatter={(_label: any, payload: any) => {
+                                const p = Array.isArray(payload) ? payload[0] : payload;
+                                return String(p?.payload?.label || '');
+                              }}
+                            />
+                            <RBar dataKey="value" radius={4} />
+                          </RBarChart>
+                        </RResponsiveContainer>
+                      </div>
+                      {/* Mobile hint */}
+                      <div className="mt-2 sm:hidden text-xs text-muted-foreground">Top categories by count</div>
                     </ChartContainer>
                   )
                 })()
@@ -907,7 +618,7 @@ export default function Page() {
         </div>
 
         {/* Total Articles by Month - full width line chart */}
-        <Card className="mb-8">
+        <Card className="mb-6">
           <CardHeader className="pb-3">
             <div className="flex items-center gap-2">
               <div className="w-6 h-6 bg-purple-500/10 rounded-lg flex items-center justify-center">
@@ -918,7 +629,7 @@ export default function Page() {
             <CardDescription>Aggregated total items per month</CardDescription>
           </CardHeader>
           <CardContent className="pt-0">
-            <div className="h-[18rem] lg:h-[22rem]">
+            <div className="h-[14rem] sm:h-[16rem] lg:h-[20rem]">
               {isLoading ? (
                 <LoadingSpinner />
               ) : (
@@ -931,7 +642,7 @@ export default function Page() {
                       <RResponsiveContainer width="100%" height="100%">
                         <RLineChart data={data} margin={{ left: 12, right: 12 }}>
                           <RCartesianGrid vertical={false} />
-                          <RXAxis dataKey="date" tickLine={false} axisLine={false} tickMargin={8} minTickGap={24} tickFormatter={(value: string) => {
+                          <RXAxis dataKey="date" tickLine={false} axisLine={false} tickMargin={8} minTickGap={20} tickFormatter={(value: string) => {
                             const d = new Date(value)
                             return d.toLocaleDateString('en-US', { month: 'short', year: '2-digit' })
                           }} />
@@ -1026,16 +737,16 @@ export default function Page() {
           </div>
 
           {/* Enhanced Mobile Card View */}
-          <div className="md:hidden space-y-4">
+          <div className="md:hidden space-y-3">
             {isLoading ? (
-              <div className="py-8">
+              <div className="py-6">
                 <LoadingSpinner />
               </div>
             ) : (
               items?.items?.map((r, idx) => (
-                <div key={idx} className="border border-gray-200 rounded-xl p-4 hover:shadow-sm transition-shadow">
-                  <div className="flex items-start justify-between gap-3 mb-3">
-                    <h3 className="font-semibold text-gray-900 flex-1 line-clamp-2">{r.title}</h3>
+                <div key={idx} className="border border-gray-200 rounded-xl p-3 hover:shadow-sm transition-shadow">
+                  <div className="flex items-start justify-between gap-2 mb-2">
+                    <h3 className="font-semibold text-gray-900 text-[15px] leading-snug flex-1 line-clamp-2">{r.title}</h3>
                     <a 
                       className="flex-shrink-0 text-blue-600 hover:text-blue-700 p-2 hover:bg-blue-50 rounded-lg transition-colors" 
                     href={r.url} 
@@ -1048,15 +759,15 @@ export default function Page() {
                     </svg>
                   </a>
                 </div>
-                  <div className="flex flex-wrap gap-2 mb-3">
-                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                  <div className="flex flex-wrap gap-2 mb-2">
+                    <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium bg-blue-100 text-blue-800">
                       {r.section}
                     </span>
-                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-700">
+                    <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium bg-gray-100 text-gray-700">
                       {r.date}
                     </span>
                   </div>
-                  <p className="text-sm text-gray-600 line-clamp-2">{r.category}</p>
+                  <p className="text-[13px] text-gray-600 line-clamp-2">{r.category}</p>
                 </div>
               ))
             )}
