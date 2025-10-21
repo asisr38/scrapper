@@ -43,8 +43,9 @@ function sortYmLabels(labels: string[]): string[] {
 }
 
 export async function GET(req: NextRequest) {
-  const url = new URL(req.url)
-  const csvParam = url.searchParams.get('csv') || ''
+  try {
+    const url = new URL(req.url)
+    const csvParam = url.searchParams.get('csv') || ''
   // Resolve JSON path: query > env > public fallback > repo root default
   const envJson = process.env.JSON_PATH || ''
   const root = path.resolve(process.cwd(), '..')
@@ -187,6 +188,23 @@ export async function GET(req: NextRequest) {
     monthly_by_section: { labels: ymLabels, series },
     facets: { sections: allSections, categories: allCategories },
   })
+  } catch (error) {
+    console.error('Error in aggregations API:', error)
+    return NextResponse.json(
+      { 
+        error: 'Internal server error',
+        message: error instanceof Error ? error.message : 'Unknown error',
+        csv_path: '',
+        total: 0,
+        by_category: [],
+        by_section: [],
+        by_year_month: { labels: [], counts: [] },
+        monthly_by_section: { labels: [], series: {} },
+        facets: { sections: [], categories: [] },
+      },
+      { status: 500 }
+    )
+  }
 }
 
 

@@ -1,5 +1,5 @@
 {
-  "generated_at": "2025-10-18T06:13:36Z",
+  "generated_at": "2025-10-21T05:04:00Z",
   "count": 80,
   "items": [
     {
@@ -12,19 +12,9 @@
       "month": 9,
       "category": "Gender and inclusive food systems and value chains",
       "url": "https://openknowledge.fao.org/handle/20.500.14283/cd6631en",
-      "summary": ""
-    },
-    {
-      "section": "publications",
-      "page": 1,
-      "title": "Gender equality and climate change: A synthesis of knowledge in agrifood systems",
-      "date": "01/09/2025",
-      "date_iso": "2025-09-01",
-      "year": 2025,
-      "month": 9,
-      "category": "Gender and inclusive food systems and value chains",
-      "url": "https://openknowledge.fao.org/handle/20.500.14283/cd4349en",
-      "summary": ""
+      "summary": "",
+      "article_summary": "",
+      "article_text": ""
     },
     {
       "section": "publications",
@@ -34,9 +24,25 @@
       "date_iso": "2025-09-01",
       "year": 2025,
       "month": 9,
-      "category": "Gender equality and women’s empowerment",
+      "category": "Gender equality and women's empowerment",
       "url": "https://openknowledge.fao.org/handle/20.500.14283/cd6759en",
-      "summary": ""
+      "summary": "",
+      "article_summary": "",
+      "article_text": ""
+    },
+    {
+      "section": "publications",
+      "page": 1,
+      "title": "Gender equality and climate change: A synthesis of knowledge in agrifood systems",
+      "date": "01/09/2025",
+      "date_iso": "2025-09-01",
+      "year": 2025,
+      "month": 9,
+      "category": "Gender and climate change, agroecology and biodiversity",
+      "url": "https://openknowledge.fao.org/handle/20.500.14283/cd4349en",
+      "summary": "",
+      "article_summary": "",
+      "article_text": ""
     },
     {
       "section": "publications",
@@ -46,21 +52,11 @@
       "date_iso": "2025-08-01",
       "year": 2025,
       "month": 8,
-      "category": "Gender equality and women’s empowerment",
+      "category": "Gender analysis, gender mainstreaming and the project cycle",
       "url": "https://openknowledge.fao.org/handle/20.500.14283/cd6263en",
-      "summary": ""
-    },
-    {
-      "section": "publications",
-      "page": 1,
-      "title": "The empowerment of rural women, gender-responsive land policies and the implementation of Sustainable Development Goal Indicators 5.a.1 and 5.a.2. Assessment report 2025",
-      "date": "01/08/2025",
-      "date_iso": "2025-08-01",
-      "year": 2025,
-      "month": 8,
-      "category": "Gender equality and women’s empowerment",
-      "url": "https://openknowledge.fao.org/handle/20.500.14283/cd5891en",
-      "summary": ""
+      "summary": "",
+      "article_summary": "",
+      "article_text": ""
     },
     {
       "section": "publications",
@@ -70,33 +66,53 @@
       "date_iso": "2025-08-01",
       "year": 2025,
       "month": 8,
-      "category": "Gender equality and women’s empowerment",
-      "url": "https://openknowledge.fao.org/handle/20.500.14283/cd5068en",
-      "summary": ""
-    },
-    {
-      "section": "publications",
-      "page": 1,
-      "title": "The Status of Youth in Agrifood Systems",
-      "date": "01/07/2025",
-      "date_iso": "2025-07-01",
-      "year": 2025,
-      "month": 7,
       "category": "Gender and inclusive food systems and value chains",
-      "url": "https://openknowledge.fao.org/handle/20.500.14283/cd5886en",
-      "summary": ""
+      "url": "https://openknowledge.fao.org/handle/20.500.14283/cd5068en",
+      "summary": "",
+      "article_summary": "",
+      "article_text": ""
     },
     {
       "section": "publications",
       "page": 1,
-      "title": "Promoting the dissemination and uptake of the​ Voluntary Guidelines on Gender Equality and Women’s and Girls’ Empowerment in the Context of Food Security and Nutrition (Programme overview 2025-2027)",
+      "title": "The empowerment of rural women, gender-responsive land policies and the implementation of Sustainable Development Goal Indicators 5.a.1 and 5.a.2. Assessment report 2025",
+      "date": "01/08/2025",
+      "date_iso": "2025-08-01",
+      "year": 2025,
+      "month": 8,
+      "category": "Gender equality and women's empowerment",
+      "url": "https://openknowledge.fao.org/handle/20.500.14283/cd5891en",
+      "summary": "",
+      "article_summary": "",
+      "article_text": ""
+    },
+    {
+      "section": "publications",
+      "page": 1,
+      "title": "Gender dynamics in pesticide use and management in Central Asia and Türkiye (Policy paper)",
       "date": "01/07/2025",
       "date_iso": "2025-07-01",
       "year": 2025,
       "month": 7,
-      "category": "Gender equality and women’s empowerment",
-      "url": "https://openknowledge.fao.org/handle/20.500.14283/cd6061en",
-      "summary": ""
+      "category": "Gender and plant production and protection",
+      "url": "https://openknowledge.fao.org/handle/20.500.14283/cd5800en",
+      "summary": "",
+      "article_summary": "",
+      "article_text": ""
+    },
+    {
+      "section": "publications",
+      "page": 1,
+      "title": "Joint Programme on Gender Transformative Approaches for Food Security and Nutrition: 2019-2024",
+      "date": "01/07/2025",
+      "date_iso": "2025-07-01",
+      "year": 2025,
+      "month": 7,
+      "category": "Gender and food security and nutrition",
+      "url": "https://openknowledge.fao.org/handle/20.500.14283/cd5994en",
+      "summary": "",
+      "article_summary": "",
+      "article_text": ""
     },
     {
       "section": "publications",
@@ -106,9 +122,11 @@
       "date_iso": "2025-07-01",
       "year": 2025,
       "month": 7,
-      "category": "Gender equality and women’s empowerment",
+      "category": "Gender equality and women's empowerment",
       "url": "https://openknowledge.fao.org/handle/20.500.14283/cd6061en",
-      "summary": ""
+      "summary": "",
+      "article_summary": "",
+      "article_text": ""
     },
     {
       "section": "publications",
@@ -120,7 +138,9 @@
       "month": 7,
       "category": "Gender and food security and nutrition",
       "url": "https://openknowledge.fao.org/handle/20.500.14283/cd5994en",
-      "summary": ""
+      "summary": "",
+      "article_summary": "",
+      "article_text": ""
     },
     {
       "section": "publications",
@@ -132,7 +152,9 @@
       "month": 6,
       "category": "Gender and decent rural employment and child labour",
       "url": "https://data.unicef.org/resources/child-labour-global-estimates-2024/",
-      "summary": ""
+      "summary": "",
+      "article_summary": "",
+      "article_text": ""
     },
     {
       "section": "publications",
@@ -142,9 +164,11 @@
       "date_iso": "2025-06-01",
       "year": 2025,
       "month": 6,
-      "category": "Gender equality and women’s empowerment",
+      "category": "Gender equality and women's empowerment",
       "url": "https://openknowledge.fao.org/handle/20.500.14283/cd5748en",
-      "summary": ""
+      "summary": "",
+      "article_summary": "",
+      "article_text": ""
     },
     {
       "section": "publications",
@@ -154,9 +178,11 @@
       "date_iso": "2025-06-01",
       "year": 2025,
       "month": 6,
-      "category": "Gender equality and women’s empowerment",
+      "category": "Gender and innovative and labour-saving technologies",
       "url": "https://openknowledge.fao.org/handle/20.500.14283/cd0954en",
-      "summary": ""
+      "summary": "",
+      "article_summary": "",
+      "article_text": ""
     },
     {
       "section": "publications",
@@ -168,7 +194,9 @@
       "month": 6,
       "category": "Gender and investment in sustainable agrifood systems",
       "url": "https://openknowledge.fao.org/handle/20.500.14283/cd1687en",
-      "summary": ""
+      "summary": "",
+      "article_summary": "",
+      "article_text": ""
     },
     {
       "section": "publications",
@@ -178,9 +206,11 @@
       "date_iso": "2025-06-01",
       "year": 2025,
       "month": 6,
-      "category": "Gender equality and women’s empowerment",
+      "category": "Gender equality and women's empowerment",
       "url": "https://openknowledge.fao.org/handle/20.500.14283/cd6012en",
-      "summary": ""
+      "summary": "",
+      "article_summary": "",
+      "article_text": ""
     },
     {
       "section": "publications",
@@ -190,9 +220,11 @@
       "date_iso": "2025-05-01",
       "year": 2025,
       "month": 5,
-      "category": "Gender equality and women’s empowerment",
+      "category": "Gender equality and women's empowerment",
       "url": "https://openknowledge.fao.org/handle/20.500.14283/cd5510en",
-      "summary": ""
+      "summary": "",
+      "article_summary": "",
+      "article_text": ""
     },
     {
       "section": "publications",
@@ -204,7 +236,9 @@
       "month": 5,
       "category": "Gender-responsive policy making and budgeting",
       "url": "https://openknowledge.fao.org/handle/20.500.14283/cd5220en",
-      "summary": ""
+      "summary": "",
+      "article_summary": "",
+      "article_text": ""
     },
     {
       "section": "publications",
@@ -214,9 +248,11 @@
       "date_iso": "2025-05-01",
       "year": 2025,
       "month": 5,
-      "category": "Gender equality and women’s empowerment",
+      "category": "Gender analysis, gender mainstreaming and the project cycle",
       "url": "https://openknowledge.fao.org/handle/20.500.14283/cd5325en",
-      "summary": ""
+      "summary": "",
+      "article_summary": "",
+      "article_text": ""
     },
     {
       "section": "publications",
@@ -226,9 +262,11 @@
       "date_iso": "2025-04-01",
       "year": 2025,
       "month": 4,
-      "category": "Gender equality and women’s empowerment",
+      "category": "Gender equality and women's empowerment",
       "url": "https://openknowledge.fao.org/handle/20.500.14283/cd5017en",
-      "summary": ""
+      "summary": "",
+      "article_summary": "",
+      "article_text": ""
     },
     {
       "section": "publications",
@@ -238,9 +276,11 @@
       "date_iso": "2025-03-26",
       "year": 2025,
       "month": 3,
-      "category": "Gender equality and women’s empowerment",
+      "category": "Gender and inclusive food systems and value chains",
       "url": "https://openknowledge.fao.org/handle/20.500.14283/cd3741en",
-      "summary": ""
+      "summary": "",
+      "article_summary": "",
+      "article_text": ""
     },
     {
       "section": "publications",
@@ -252,7 +292,9 @@
       "month": 3,
       "category": "Gender and inclusive food systems and value chains",
       "url": "https://openknowledge.fao.org/handle/20.500.14283/cd4123en",
-      "summary": ""
+      "summary": "",
+      "article_summary": "",
+      "article_text": ""
     },
     {
       "section": "publications",
@@ -262,9 +304,11 @@
       "date_iso": "2025-03-01",
       "year": 2025,
       "month": 3,
-      "category": "Gender equality and women’s empowerment",
+      "category": "Gender equality and women's empowerment",
       "url": "https://openknowledge.fao.org/handle/20.500.14283/cd4667en",
-      "summary": ""
+      "summary": "",
+      "article_summary": "",
+      "article_text": ""
     },
     {
       "section": "publications",
@@ -274,9 +318,11 @@
       "date_iso": "2025-02-01",
       "year": 2025,
       "month": 2,
-      "category": "Gender equality and women’s empowerment",
+      "category": "Gender equality and women's empowerment",
       "url": "https://openknowledge.fao.org/handle/20.500.14283/cd4109en",
-      "summary": ""
+      "summary": "",
+      "article_summary": "",
+      "article_text": ""
     },
     {
       "section": "publications",
@@ -288,7 +334,9 @@
       "month": 2,
       "category": "Gender analysis, gender mainstreaming and the project cycle",
       "url": "https://openknowledge.fao.org/handle/20.500.14283/cd4147en",
-      "summary": ""
+      "summary": "",
+      "article_summary": "",
+      "article_text": ""
     },
     {
       "section": "publications",
@@ -298,9 +346,11 @@
       "date_iso": "2025-02-01",
       "year": 2025,
       "month": 2,
-      "category": "Gender equality and women’s empowerment",
+      "category": "Gender equality and women's empowerment",
       "url": "https://openknowledge.fao.org/handle/20.500.14283/cd3971en",
-      "summary": ""
+      "summary": "",
+      "article_summary": "",
+      "article_text": ""
     },
     {
       "section": "publications",
@@ -312,7 +362,9 @@
       "month": 2,
       "category": "Gender in fisheries and aquaculture",
       "url": "https://openknowledge.fao.org/handle/20.500.14283/cd4304en",
-      "summary": ""
+      "summary": "",
+      "article_summary": "",
+      "article_text": ""
     },
     {
       "section": "publications",
@@ -324,7 +376,9 @@
       "month": 1,
       "category": "Gender and climate change, agroecology and biodiversity",
       "url": "https://openknowledge.fao.org/handle/20.500.14283/cd3900en",
-      "summary": ""
+      "summary": "",
+      "article_summary": "",
+      "article_text": ""
     },
     {
       "section": "publications",
@@ -334,9 +388,11 @@
       "date_iso": "2025-01-01",
       "year": 2025,
       "month": 1,
-      "category": "Gender equality and women’s empowerment",
+      "category": "Gender analysis, gender mainstreaming and the project cycle",
       "url": "https://openknowledge.fao.org/handle/20.500.14283/cd3777en",
-      "summary": ""
+      "summary": "",
+      "article_summary": "",
+      "article_text": ""
     },
     {
       "section": "publications",
@@ -348,7 +404,9 @@
       "month": 12,
       "category": "Gender analysis, gender mainstreaming and the project cycle",
       "url": "https://openknowledge.fao.org/handle/20.500.14283/cd2629en",
-      "summary": ""
+      "summary": "",
+      "article_summary": "",
+      "article_text": ""
     },
     {
       "section": "publications",
@@ -358,9 +416,11 @@
       "date_iso": "2024-11-12",
       "year": 2024,
       "month": 11,
-      "category": "Gender equality and women’s empowerment",
+      "category": "Gender equality and women's empowerment",
       "url": "https://openknowledge.fao.org/handle/20.500.14283/cd3022en",
-      "summary": ""
+      "summary": "",
+      "article_summary": "",
+      "article_text": ""
     },
     {
       "section": "publications",
@@ -370,9 +430,11 @@
       "date_iso": "2024-11-12",
       "year": 2024,
       "month": 11,
-      "category": "Gender equality and women’s empowerment",
+      "category": "Gender equality and women's empowerment",
       "url": "https://openknowledge.fao.org/handle/20.500.14283/cd2996en",
-      "summary": ""
+      "summary": "",
+      "article_summary": "",
+      "article_text": ""
     },
     {
       "section": "publications",
@@ -382,9 +444,11 @@
       "date_iso": "2024-11-06",
       "year": 2024,
       "month": 11,
-      "category": "Gender equality and women’s empowerment",
+      "category": "Gender equality and women's empowerment",
       "url": "https://openknowledge.fao.org/handle/20.500.14283/cc9704en",
-      "summary": ""
+      "summary": "",
+      "article_summary": "",
+      "article_text": ""
     },
     {
       "section": "publications",
@@ -396,7 +460,9 @@
       "month": 11,
       "category": "Gender in fisheries and aquaculture",
       "url": "https://openknowledge.fao.org/handle/20.500.14283/cd2830en",
-      "summary": ""
+      "summary": "",
+      "article_summary": "",
+      "article_text": ""
     },
     {
       "section": "publications",
@@ -408,7 +474,9 @@
       "month": 11,
       "category": "Gender and emergencies and resilience building",
       "url": "https://openknowledge.fao.org/handle/20.500.14283/cd3054en",
-      "summary": ""
+      "summary": "",
+      "article_summary": "",
+      "article_text": ""
     },
     {
       "section": "publications",
@@ -420,7 +488,9 @@
       "month": 11,
       "category": "Gender and climate change, agroecology and biodiversity",
       "url": "https://openknowledge.fao.org/handle/20.500.14283/cd3203en",
-      "summary": ""
+      "summary": "",
+      "article_summary": "",
+      "article_text": ""
     },
     {
       "section": "publications",
@@ -430,9 +500,11 @@
       "date_iso": "2024-11-01",
       "year": 2024,
       "month": 11,
-      "category": "Gender equality and women’s empowerment",
+      "category": "Gender equality and women's empowerment",
       "url": "https://openknowledge.fao.org/handle/20.500.14283/cd3292en",
-      "summary": ""
+      "summary": "",
+      "article_summary": "",
+      "article_text": ""
     },
     {
       "section": "publications",
@@ -442,9 +514,11 @@
       "date_iso": "2024-11-01",
       "year": 2024,
       "month": 11,
-      "category": "Gender equality and women’s empowerment",
+      "category": "Gender equality and women's empowerment",
       "url": "https://openknowledge.fao.org/handle/20.500.14283/cd3392en",
-      "summary": ""
+      "summary": "",
+      "article_summary": "",
+      "article_text": ""
     },
     {
       "section": "publications",
@@ -454,9 +528,11 @@
       "date_iso": "2024-11-01",
       "year": 2024,
       "month": 11,
-      "category": "Gender equality and women’s empowerment",
+      "category": "Gender and emergencies and resilience building",
       "url": "https://openknowledge.fao.org/handle/20.500.14283/cd3244en",
-      "summary": ""
+      "summary": "",
+      "article_summary": "",
+      "article_text": ""
     },
     {
       "section": "publications",
@@ -468,7 +544,9 @@
       "month": 11,
       "category": "Gender and climate change, agroecology and biodiversity",
       "url": "https://openknowledge.fao.org/handle/20.500.14283/cd3248en",
-      "summary": ""
+      "summary": "",
+      "article_summary": "",
+      "article_text": ""
     },
     {
       "section": "publications",
@@ -480,7 +558,9 @@
       "month": 11,
       "category": "Gender and land and water",
       "url": "https://openknowledge.fao.org/handle/20.500.14283/cd0422en",
-      "summary": ""
+      "summary": "",
+      "article_summary": "",
+      "article_text": ""
     },
     {
       "section": "publications",
@@ -490,9 +570,11 @@
       "date_iso": "2024-11-01",
       "year": 2024,
       "month": 11,
-      "category": "Gender equality and women’s empowerment",
+      "category": "Gender equality and women's empowerment",
       "url": "https://openknowledge.fao.org/handle/20.500.14283/cd3418en",
-      "summary": ""
+      "summary": "",
+      "article_summary": "",
+      "article_text": ""
     },
     {
       "section": "publications",
@@ -502,9 +584,11 @@
       "date_iso": "2024-11-01",
       "year": 2024,
       "month": 11,
-      "category": "Gender equality and women’s empowerment",
+      "category": "Gender and innovative and labour-saving technologies",
       "url": "https://openknowledge.fao.org/handle/20.500.14283/cd3394en",
-      "summary": ""
+      "summary": "",
+      "article_summary": "",
+      "article_text": ""
     },
     {
       "section": "publications",
@@ -516,7 +600,9 @@
       "month": 10,
       "category": "Gender and food security and nutrition",
       "url": "https://openknowledge.fao.org/handle/20.500.14283/cd2465en",
-      "summary": ""
+      "summary": "",
+      "article_summary": "",
+      "article_text": ""
     },
     {
       "section": "publications",
@@ -526,9 +612,11 @@
       "date_iso": "2024-10-01",
       "year": 2024,
       "month": 10,
-      "category": "Gender equality and women’s empowerment",
+      "category": "Gender in fisheries and aquaculture",
       "url": "https://openknowledge.fao.org/handle/20.500.14283/cd2947en",
-      "summary": ""
+      "summary": "",
+      "article_summary": "",
+      "article_text": ""
     },
     {
       "section": "publications",
@@ -540,7 +628,9 @@
       "month": 10,
       "category": "Gender and food security and nutrition",
       "url": "https://openknowledge.fao.org/handle/20.500.14283/cd2877en",
-      "summary": ""
+      "summary": "",
+      "article_summary": "",
+      "article_text": ""
     },
     {
       "section": "publications",
@@ -550,9 +640,11 @@
       "date_iso": "2024-10-01",
       "year": 2024,
       "month": 10,
-      "category": "Gender equality and women’s empowerment",
+      "category": "Gender equality and women's empowerment",
       "url": "https://openknowledge.fao.org/handle/20.500.14283/cc9187en",
-      "summary": ""
+      "summary": "",
+      "article_summary": "",
+      "article_text": ""
     },
     {
       "section": "publications",
@@ -564,7 +656,9 @@
       "month": 10,
       "category": "Gender and inclusive food systems and value chains",
       "url": "https://openknowledge.fao.org/handle/20.500.14283/cd1282en",
-      "summary": ""
+      "summary": "",
+      "article_summary": "",
+      "article_text": ""
     },
     {
       "section": "publications",
@@ -574,9 +668,11 @@
       "date_iso": "2024-10-01",
       "year": 2024,
       "month": 10,
-      "category": "Gender equality and women’s empowerment",
+      "category": "Gender and climate change, agroecology and biodiversity",
       "url": "https://openknowledge.fao.org/handle/20.500.14283/cd2842en",
-      "summary": ""
+      "summary": "",
+      "article_summary": "",
+      "article_text": ""
     },
     {
       "section": "publications",
@@ -588,7 +684,9 @@
       "month": 10,
       "category": "Gender analysis, gender mainstreaming and the project cycle",
       "url": "https://openknowledge.fao.org/handle/20.500.14283/cd2907en",
-      "summary": ""
+      "summary": "",
+      "article_summary": "",
+      "article_text": ""
     },
     {
       "section": "publications",
@@ -598,9 +696,11 @@
       "date_iso": "2024-10-01",
       "year": 2024,
       "month": 10,
-      "category": "Gender equality and women’s empowerment",
+      "category": "Gender and inclusive food systems and value chains",
       "url": "https://openknowledge.fao.org/handle/20.500.14283/cd2721en",
-      "summary": ""
+      "summary": "",
+      "article_summary": "",
+      "article_text": ""
     },
     {
       "section": "publications",
@@ -612,7 +712,9 @@
       "month": 10,
       "category": "Gender in fisheries and aquaculture",
       "url": "https://openknowledge.fao.org/handle/20.500.14283/cd2818en",
-      "summary": ""
+      "summary": "",
+      "article_summary": "",
+      "article_text": ""
     },
     {
       "section": "publications",
@@ -622,9 +724,11 @@
       "date_iso": "2024-09-01",
       "year": 2024,
       "month": 9,
-      "category": "Gender equality and women’s empowerment",
+      "category": "Gender and emergencies and resilience building",
       "url": "https://openknowledge.fao.org/handle/20.500.14283/cd2345en",
-      "summary": ""
+      "summary": "",
+      "article_summary": "",
+      "article_text": ""
     },
     {
       "section": "publications",
@@ -634,9 +738,11 @@
       "date_iso": "2024-09-01",
       "year": 2024,
       "month": 9,
-      "category": "Gender and inclusive food systems and value chains",
+      "category": "Gender and emergencies and resilience building",
       "url": "https://openknowledge.fao.org/handle/20.500.14283/cd2221en",
-      "summary": ""
+      "summary": "",
+      "article_summary": "",
+      "article_text": ""
     },
     {
       "section": "publications",
@@ -646,9 +752,11 @@
       "date_iso": "2024-08-01",
       "year": 2024,
       "month": 8,
-      "category": "Gender equality and women’s empowerment",
+      "category": "Gender-responsive policy making and budgeting",
       "url": "https://openknowledge.fao.org/handle/20.500.14283/cd1028en",
-      "summary": ""
+      "summary": "",
+      "article_summary": "",
+      "article_text": ""
     },
     {
       "section": "publications",
@@ -660,7 +768,9 @@
       "month": 8,
       "category": "Gender and inclusive food systems and value chains",
       "url": "https://openknowledge.fao.org/handle/20.500.14283/cd2082en",
-      "summary": ""
+      "summary": "",
+      "article_summary": "",
+      "article_text": ""
     },
     {
       "section": "publications",
@@ -672,7 +782,9 @@
       "month": 8,
       "category": "Gender in fisheries and aquaculture",
       "url": "https://openknowledge.fao.org/handle/20.500.14283/cd1776en",
-      "summary": ""
+      "summary": "",
+      "article_summary": "",
+      "article_text": ""
     },
     {
       "section": "publications",
@@ -682,9 +794,11 @@
       "date_iso": "2024-08-01",
       "year": 2024,
       "month": 8,
-      "category": "Gender equality and women’s empowerment",
+      "category": "Gender and inclusive food systems and value chains",
       "url": "https://openknowledge.fao.org/handle/20.500.14283/cd1030en",
-      "summary": ""
+      "summary": "",
+      "article_summary": "",
+      "article_text": ""
     },
     {
       "section": "publications",
@@ -694,9 +808,11 @@
       "date_iso": "2024-08-01",
       "year": 2024,
       "month": 8,
-      "category": "Gender equality and women’s empowerment",
+      "category": "Gender equality and women's empowerment",
       "url": "https://openknowledge.fao.org/handle/20.500.14283/cd1886en",
-      "summary": ""
+      "summary": "",
+      "article_summary": "",
+      "article_text": ""
     },
     {
       "section": "publications",
@@ -706,9 +822,11 @@
       "date_iso": "2024-08-01",
       "year": 2024,
       "month": 8,
-      "category": "Gender in fisheries and aquaculture",
+      "category": "Gender and inclusive food systems and value chains",
       "url": "https://openknowledge.fao.org/handle/20.500.14283/cd1857en",
-      "summary": ""
+      "summary": "",
+      "article_summary": "",
+      "article_text": ""
     },
     {
       "section": "publications",
@@ -720,7 +838,9 @@
       "month": 8,
       "category": "Gender in fisheries and aquaculture",
       "url": "https://openknowledge.fao.org/handle/20.500.14283/cd1155en",
-      "summary": ""
+      "summary": "",
+      "article_summary": "",
+      "article_text": ""
     },
     {
       "section": "publications",
@@ -732,7 +852,9 @@
       "month": 8,
       "category": "Gender and inclusive food systems and value chains",
       "url": "https://openknowledge.fao.org/handle/20.500.14283/cd1842en",
-      "summary": ""
+      "summary": "",
+      "article_summary": "",
+      "article_text": ""
     },
     {
       "section": "publications",
@@ -744,7 +866,9 @@
       "month": 7,
       "category": "Gender and food security and nutrition",
       "url": "https://openknowledge.fao.org/handle/20.500.14283/cd1546en",
-      "summary": ""
+      "summary": "",
+      "article_summary": "",
+      "article_text": ""
     },
     {
       "section": "publications",
@@ -756,7 +880,9 @@
       "month": 7,
       "category": "Gender and rural advisory services",
       "url": "https://openknowledge.fao.org/handle/20.500.14283/cd1624en",
-      "summary": ""
+      "summary": "",
+      "article_summary": "",
+      "article_text": ""
     },
     {
       "section": "publications",
@@ -766,9 +892,11 @@
       "date_iso": "2024-07-01",
       "year": 2024,
       "month": 7,
-      "category": "Gender equality and women’s empowerment",
+      "category": "Gender and rural financial services",
       "url": "https://openknowledge.fao.org/handle/20.500.14283/cd1373en",
-      "summary": ""
+      "summary": "",
+      "article_summary": "",
+      "article_text": ""
     },
     {
       "section": "publications",
@@ -778,9 +906,11 @@
       "date_iso": "2024-07-01",
       "year": 2024,
       "month": 7,
-      "category": "Gender equality and women’s empowerment",
+      "category": "Gender and rural financial services",
       "url": "https://openknowledge.fao.org/handle/20.500.14283/cd1487en",
-      "summary": ""
+      "summary": "",
+      "article_summary": "",
+      "article_text": ""
     },
     {
       "section": "publications",
@@ -792,7 +922,9 @@
       "month": 7,
       "category": "Gender in forestry and agroforestry",
       "url": "https://openknowledge.fao.org/handle/20.500.14283/cd1211en",
-      "summary": ""
+      "summary": "",
+      "article_summary": "",
+      "article_text": ""
     },
     {
       "section": "publications",
@@ -802,9 +934,11 @@
       "date_iso": "2024-07-01",
       "year": 2024,
       "month": 7,
-      "category": "Gender equality and women’s empowerment",
+      "category": "Gender equality and women's empowerment",
       "url": "https://openknowledge.fao.org/handle/20.500.14283/cd1684en",
-      "summary": ""
+      "summary": "",
+      "article_summary": "",
+      "article_text": ""
     },
     {
       "section": "publications",
@@ -814,9 +948,11 @@
       "date_iso": "2024-07-01",
       "year": 2024,
       "month": 7,
-      "category": "Gender equality and women’s empowerment",
+      "category": "Gender equality and women's empowerment",
       "url": "https://openknowledge.fao.org/handle/20.500.14283/cd1630en",
-      "summary": ""
+      "summary": "",
+      "article_summary": "",
+      "article_text": ""
     },
     {
       "section": "publications",
@@ -828,7 +964,9 @@
       "month": 7,
       "category": "Gender and innovative and labour-saving technologies",
       "url": "https://openknowledge.fao.org/handle/20.500.14283/cd1185en",
-      "summary": ""
+      "summary": "",
+      "article_summary": "",
+      "article_text": ""
     },
     {
       "section": "publications",
@@ -838,9 +976,11 @@
       "date_iso": "2024-07-01",
       "year": 2024,
       "month": 7,
-      "category": "Gender equality and women’s empowerment",
+      "category": "Gender in fisheries and aquaculture",
       "url": "https://openknowledge.fao.org/handle/20.500.14283/cd0879en",
-      "summary": ""
+      "summary": "",
+      "article_summary": "",
+      "article_text": ""
     },
     {
       "section": "publications",
@@ -852,7 +992,9 @@
       "month": 7,
       "category": "Gender and inclusive food systems and value chains",
       "url": "https://openknowledge.fao.org/handle/20.500.14283/cd1375en",
-      "summary": ""
+      "summary": "",
+      "article_summary": "",
+      "article_text": ""
     },
     {
       "section": "publications",
@@ -864,7 +1006,9 @@
       "month": 6,
       "category": "Gender and inclusive food systems and value chains",
       "url": "https://openknowledge.fao.org/handle/20.500.14283/cc9848en",
-      "summary": ""
+      "summary": "",
+      "article_summary": "",
+      "article_text": ""
     },
     {
       "section": "publications",
@@ -876,7 +1020,9 @@
       "month": 6,
       "category": "Gender statistics and sex-disaggregated data",
       "url": "https://openknowledge.fao.org/handle/20.500.14283/cd1297en",
-      "summary": ""
+      "summary": "",
+      "article_summary": "",
+      "article_text": ""
     },
     {
       "section": "publications",
@@ -888,7 +1034,9 @@
       "month": 6,
       "category": "Gender in fisheries and aquaculture",
       "url": "https://openknowledge.fao.org/handle/20.500.14283/cd0683en",
-      "summary": ""
+      "summary": "",
+      "article_summary": "",
+      "article_text": ""
     },
     {
       "section": "publications",
@@ -898,9 +1046,11 @@
       "date_iso": "2024-06-01",
       "year": 2024,
       "month": 6,
-      "category": "Gender equality and women’s empowerment",
+      "category": "Gender and inclusive food systems and value chains",
       "url": "https://openknowledge.fao.org/handle/20.500.14283/cc8570en",
-      "summary": ""
+      "summary": "",
+      "article_summary": "",
+      "article_text": ""
     },
     {
       "section": "publications",
@@ -910,9 +1060,11 @@
       "date_iso": "2024-06-01",
       "year": 2024,
       "month": 6,
-      "category": "Gender equality and women’s empowerment",
+      "category": "Gender equality and women's empowerment",
       "url": "https://openknowledge.fao.org/handle/20.500.14283/cd1154en",
-      "summary": ""
+      "summary": "",
+      "article_summary": "",
+      "article_text": ""
     },
     {
       "section": "publications",
@@ -922,9 +1074,11 @@
       "date_iso": "2024-06-01",
       "year": 2024,
       "month": 6,
-      "category": "Gender equality and women’s empowerment",
+      "category": "Gender and land and water",
       "url": "https://openknowledge.fao.org/handle/20.500.14283/cd1076en",
-      "summary": ""
+      "summary": "",
+      "article_summary": "",
+      "article_text": ""
     },
     {
       "section": "publications",
@@ -934,9 +1088,11 @@
       "date_iso": "2024-06-01",
       "year": 2024,
       "month": 6,
-      "category": "Gender equality and women’s empowerment",
+      "category": "Gender equality and women's empowerment",
       "url": "https://openknowledge.fao.org/handle/20.500.14283/cd0278en",
-      "summary": ""
+      "summary": "",
+      "article_summary": "",
+      "article_text": ""
     },
     {
       "section": "publications",
@@ -946,9 +1102,11 @@
       "date_iso": "2024-06-01",
       "year": 2024,
       "month": 6,
-      "category": "Gender equality and women’s empowerment",
+      "category": "Gender equality and women's empowerment",
       "url": "https://openknowledge.fao.org/handle/20.500.14283/cd0923en",
-      "summary": ""
+      "summary": "",
+      "article_summary": "",
+      "article_text": ""
     },
     {
       "section": "publications",
@@ -960,7 +1118,9 @@
       "month": 6,
       "category": "Gender and rural advisory services",
       "url": "https://openknowledge.fao.org/handle/20.500.14283/cc7701en",
-      "summary": ""
+      "summary": "",
+      "article_summary": "",
+      "article_text": ""
     }
   ]
 }
