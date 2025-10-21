@@ -817,12 +817,13 @@ export default function Page() {
                   const data = (agg?.by_section || []).map((d) => ({ name: d.label, value: d.count, fill: getStableColor(String(d.label)) }))
                   const total = data.reduce((a, c) => a + c.value, 0)
                   return (
-                    <div className="mx-auto aspect-square max-h-[28rem]">
-                      <RPieChart width={500} height={500} className="w-full h-full">
+                    <div className="mx-auto max-w-full">
+                      <RResponsiveContainer width="100%" aspect={1}>
+                        <RPieChart>
                         <RTooltip formatter={(value: any, _name: any, item: any) => {
                           return [String(value), item?.payload?.name || ''];
                         }} />
-                        <Pie
+                          <Pie
                           data={data}
                           dataKey="value"
                           nameKey="name"
@@ -845,8 +846,9 @@ export default function Page() {
                               return null
                             }}
                           />
-                        </Pie>
-                      </RPieChart>
+                          </Pie>
+                        </RPieChart>
+                      </RResponsiveContainer>
                     </div>
                   )
                 })()
@@ -880,20 +882,22 @@ export default function Page() {
                     ])
                   ) as any
                   return (
-                    <ChartContainer config={config} className="mx-auto max-h-[28rem] w-full">
-                      <RBarChart data={data} layout="vertical" margin={{ right: 16, left: 8 }} width={600} height={450} className="w-full h-full">
-                        <RCartesianGrid horizontal={false} />
-                        <RYAxis dataKey="label" type="category" tickLine={false} tickMargin={10} axisLine={false} hide />
-                        <RXAxis dataKey="value" type="number" hide />
-                        <RTooltip 
-                          formatter={(value: any) => [String(value), 'Items']}
-                          labelFormatter={(_label: any, payload: any) => {
-                            const p = Array.isArray(payload) ? payload[0] : payload;
-                            return String(p?.payload?.label || '');
-                          }}
-                        />
-                        <RBar dataKey="value" radius={4} />
-                      </RBarChart>
+                    <ChartContainer config={config} className="mx-auto w-full">
+                      <RResponsiveContainer width="100%" height={360}>
+                        <RBarChart data={data} layout="vertical" margin={{ right: 16, left: 8 }}>
+                          <RCartesianGrid horizontal={false} />
+                          <RYAxis dataKey="label" type="category" tickLine={false} tickMargin={10} axisLine={false} hide />
+                          <RXAxis dataKey="value" type="number" hide />
+                          <RTooltip 
+                            formatter={(value: any) => [String(value), 'Items']}
+                            labelFormatter={(_label: any, payload: any) => {
+                              const p = Array.isArray(payload) ? payload[0] : payload;
+                              return String(p?.payload?.label || '');
+                            }}
+                          />
+                          <RBar dataKey="value" radius={4} />
+                        </RBarChart>
+                      </RResponsiveContainer>
                     </ChartContainer>
                   )
                 })()
