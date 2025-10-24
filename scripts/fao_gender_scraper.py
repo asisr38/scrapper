@@ -207,87 +207,143 @@ def parse_date_to_iso(date_str: str) -> Tuple[str, int, int]:
 
 
 def categorize_article(title: str, summary: str, section: str) -> str:
-    """Categorize into FAO Gender Thematic Areas using keyword scoring.
+    """Categorize into FAO Gender Thematic Areas using improved keyword scoring.
     Returns one primary Thematic Area string from the predefined list.
     """
     text = f"{title} {summary}".lower()
     # Normalize common punctuation variants to improve matching
-    text = text.replace("’", "'").replace("“", '"').replace("”", '"')
-
-    thematic_keywords: List[Tuple[str, List[str]]] = [
-        ("Gender equality and women’s empowerment", [
-            "gender equality", "women", "girls", "empower", "empowerment", "leadership", "equity", "inclusion", "rights"
-        ]),
-        ("Gender analysis, gender mainstreaming and the project cycle", [
-            "gender analysis", "gender mainstreaming", "mainstreaming", "project cycle", "logframe", "logical framework", "design phase", "implementation phase", "monitoring and evaluation", "m&e"
-        ]),
-        ("Gender-responsive policy making and budgeting", [
-            "policy", "policies", "policy-making", "policy making", "budget", "budgeting", "gender-responsive budget", "grb", "governance", "regulation", "legislation"
-        ]),
-        ("Gender statistics and sex-disaggregated data", [
-            "sex-disaggregated", "sex disaggregated", "gender statistics", "disaggregated data", "indicator", "survey", "census", "data collection", "gender data"
-        ]),
+    text = text.replace("'", "'").replace(""", '"').replace(""", '"')
+    
+    # Define thematic areas with weighted keywords and phrases
+    # Format: (category_name, [(keyword/phrase, weight), ...])
+    thematic_keywords = [
+        # Most specific categories first (higher priority)
         ("Gender in fisheries and aquaculture", [
-            "fishery", "fisheries", "aquaculture", "fisher", "fishing", "fish value chain"
+            ("fisheries", 3), ("aquaculture", 3), ("fisher", 2), ("fishing", 2), 
+            ("fish value chain", 4), ("marine", 2), ("coastal", 2), ("seafood", 2)
         ]),
         ("Gender in forestry and agroforestry", [
-            "forestry", "forest", "agroforestry", "woodlot", "non-timber forest", "ntfp"
+            ("forestry", 3), ("forest", 2), ("agroforestry", 3), ("woodlot", 3), 
+            ("non-timber forest", 4), ("ntfp", 3), ("timber", 2), ("deforestation", 2)
         ]),
         ("Gender and livestock", [
-            "livestock", "pastoral", "pastoralist", "herd", "animal health", "small ruminant", "cattle", "goat", "sheep"
+            ("livestock", 3), ("pastoral", 3), ("pastoralist", 3), ("herd", 2), 
+            ("animal health", 4), ("small ruminant", 4), ("cattle", 2), ("goat", 2), 
+            ("sheep", 2), ("poultry", 2), ("dairy", 2)
         ]),
         ("Gender and plant production and protection", [
-            "plant production", "crop", "crop production", "plant protection", "ipm", "integrated pest", "seed", "agronomy", "plant health"
+            ("plant production", 4), ("crop", 2), ("crop production", 4), 
+            ("plant protection", 4), ("ipm", 3), ("integrated pest", 4), 
+            ("seed", 2), ("agronomy", 3), ("plant health", 4), ("pesticide", 2)
         ]),
         ("Gender and innovative and labour-saving technologies", [
-            "innovation", "innovative", "technology", "technologies", "labour-saving", "labor-saving", "mechanization", "mechanisation", "tools", "equipment", "digital"
+            ("innovation", 2), ("innovative", 2), ("technology", 2), ("technologies", 2), 
+            ("labour-saving", 4), ("labor-saving", 4), ("mechanization", 3), 
+            ("mechanisation", 3), ("tools", 2), ("equipment", 2), ("digital", 2),
+            ("ict", 3), ("mobile", 2), ("app", 2)
         ]),
         ("Gender and land and water", [
-            "land tenure", "land rights", "land", "water", "irrigation", "watershed", "water management", "land governance"
-        ]),
-        ("Gender and food security and nutrition", [
-            "food security", "nutrition", "malnutrition", "diet", "food systems", "household food", "nutritious"
-        ]),
-        ("Gender and inclusive food systems and value chains", [
-            "inclusive", "value chain", "market access", "agrifood", "food system", "processing", "marketing", "inclusive business"
+            ("land tenure", 4), ("land rights", 4), ("land", 2), ("water", 2), 
+            ("irrigation", 3), ("watershed", 3), ("water management", 4), 
+            ("land governance", 4), ("tenure", 3), ("property rights", 3)
         ]),
         ("Gender and climate change, agroecology and biodiversity", [
-            "climate", "climate change", "agroecology", "biodiversity", "mitigation", "adaptation", "emissions", "ecosystem", "nature-based"
+            ("climate", 2), ("climate change", 4), ("agroecology", 4), 
+            ("biodiversity", 3), ("mitigation", 3), ("adaptation", 3), 
+            ("emissions", 3), ("ecosystem", 3), ("nature-based", 4),
+            ("carbon", 2), ("greenhouse", 2), ("sustainability", 2)
         ]),
         ("Gender and emergencies and resilience building", [
-            "emergency", "humanitarian", "crisis", "conflict", "resilience", "shock", "disaster", "drm", "risk management"
+            ("emergency", 3), ("humanitarian", 3), ("crisis", 3), ("conflict", 3), 
+            ("resilience", 3), ("shock", 3), ("disaster", 3), ("drm", 4), 
+            ("risk management", 4), ("recovery", 2), ("relief", 2)
         ]),
         ("Gender-based violence and protection from sexual exploitation and abuse", [
-            "gender-based violence", "gbv", "violence", "protection from sexual exploitation and abuse", "psea", "harassment", "safeguarding"
+            ("gender-based violence", 4), ("gbv", 4), ("violence", 3), 
+            ("protection from sexual exploitation and abuse", 5), ("psea", 4), 
+            ("harassment", 3), ("safeguarding", 3), ("abuse", 3)
         ]),
         ("Gender and rural financial services", [
-            "finance", "financial services", "microfinance", "credit", "loans", "savings", "remittances"
+            ("finance", 2), ("financial services", 4), ("microfinance", 4), 
+            ("credit", 3), ("loans", 3), ("savings", 3), ("remittances", 3),
+            ("banking", 2), ("financial inclusion", 4)
         ]),
         ("Gender and decent rural employment and child labour", [
-            "decent work", "decent employment", "rural employment", "child labour", "child labor", "occupational safety", "oshea", "youth employment"
+            ("decent work", 4), ("decent employment", 4), ("rural employment", 4), 
+            ("child labour", 4), ("child labor", 4), ("occupational safety", 4), 
+            ("oshea", 4), ("youth employment", 4), ("job", 2), ("workplace", 2)
         ]),
         ("Gender and investment in sustainable agrifood systems", [
-            "investment", "invest", "sustainable agrifood", "infrastructure", "capital", "financing", "public investment", "private investment"
+            ("investment", 3), ("invest", 3), ("sustainable agrifood", 4), 
+            ("infrastructure", 3), ("capital", 3), ("financing", 3), 
+            ("public investment", 4), ("private investment", 4), ("funding", 2)
         ]),
         ("Gender and rural advisory services", [
-            "extension", "advisory services", "rural advisory", "farmer field school", "ffs", "capacity development", "training"
+            ("extension", 3), ("advisory services", 4), ("rural advisory", 4), 
+            ("farmer field school", 4), ("ffs", 4), ("capacity development", 4), 
+            ("training", 2), ("education", 2), ("knowledge transfer", 3)
         ]),
         ("Gender-sensitive social protection", [
-            "social protection", "cash transfer", "safety net", "social assistance", "insurance", "public works"
+            ("social protection", 4), ("cash transfer", 4), ("safety net", 4), 
+            ("social assistance", 4), ("insurance", 3), ("public works", 3),
+            ("welfare", 2), ("benefits", 2)
+        ]),
+        ("Gender-responsive policy making and budgeting", [
+            ("policy", 2), ("policies", 2), ("policy-making", 4), ("policy making", 4), 
+            ("budget", 3), ("budgeting", 3), ("gender-responsive budget", 5), 
+            ("grb", 4), ("governance", 2), ("regulation", 2), ("legislation", 2),
+            ("law", 2), ("legal", 2)
+        ]),
+        ("Gender statistics and sex-disaggregated data", [
+            ("sex-disaggregated", 4), ("sex disaggregated", 4), ("gender statistics", 4), 
+            ("disaggregated data", 4), ("indicator", 3), ("survey", 3), 
+            ("census", 3), ("data collection", 4), ("gender data", 4),
+            ("statistics", 2), ("metrics", 2)
+        ]),
+        ("Gender and food security and nutrition", [
+            ("food security", 4), ("nutrition", 3), ("malnutrition", 4), 
+            ("diet", 2), ("food systems", 3), ("household food", 4), 
+            ("nutritious", 2), ("hunger", 2), ("stunting", 3), ("wasting", 3)
+        ]),
+        ("Gender and inclusive food systems and value chains", [
+            ("inclusive", 2), ("value chain", 4), ("market access", 4), 
+            ("agrifood", 3), ("food system", 3), ("processing", 3), 
+            ("marketing", 3), ("inclusive business", 4), ("trade", 2),
+            ("supply chain", 3), ("distribution", 2)
+        ]),
+        ("Gender analysis, gender mainstreaming and the project cycle", [
+            ("gender analysis", 4), ("gender mainstreaming", 4), ("mainstreaming", 3), 
+            ("project cycle", 4), ("logframe", 3), ("logical framework", 4), 
+            ("design phase", 4), ("implementation phase", 4), 
+            ("monitoring and evaluation", 4), ("m&e", 3), ("assessment", 2)
+        ]),
+        # General category last (lowest priority)
+        ("Gender equality and women's empowerment", [
+            ("gender equality", 3), ("women", 1), ("girls", 1), ("empower", 2), 
+            ("empowerment", 2), ("leadership", 2), ("equity", 2), ("inclusion", 2), 
+            ("rights", 2), ("equal", 1), ("female", 1)
         ]),
     ]
 
-    best_category = "Gender equality and women’s empowerment"
+    best_category = "Gender equality and women's empowerment"  # Default fallback
     best_score = 0
-    for category_label, keywords in thematic_keywords:
+    
+    for category_label, keyword_weights in thematic_keywords:
         score = 0
-        for keyword in keywords:
+        for keyword, weight in keyword_weights:
             if keyword in text:
-                score += 1
+                score += weight
+                # Bonus for exact phrase matches
+                if len(keyword.split()) > 1:
+                    score += 1
         if score > best_score:
             best_score = score
             best_category = category_label
-
+    
+    # If no specific category scored well, use the general one
+    if best_score < 2:
+        return "Gender equality and women's empowerment"
+    
     return best_category
 
 

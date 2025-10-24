@@ -17,7 +17,8 @@ type JsonPayload = {
 }
 
 export async function GET(req: NextRequest) {
-  const url = new URL(req.url)
+  try {
+    const url = new URL(req.url)
   const csvParam = url.searchParams.get('csv') || ''
   const limit = Math.max(1, Math.min(500, parseInt(url.searchParams.get('limit') || '20', 10)))
   const offset = Math.max(0, parseInt(url.searchParams.get('offset') || '0', 10))
@@ -134,6 +135,18 @@ export async function GET(req: NextRequest) {
   })
 
   return NextResponse.json({ total: filtered.length, items: compact })
+  } catch (error) {
+    console.error('Error in items API:', error)
+    return NextResponse.json(
+      { 
+        error: 'Internal server error',
+        message: error instanceof Error ? error.message : 'Unknown error',
+        total: 0,
+        items: []
+      },
+      { status: 500 }
+    )
+  }
 }
 
 

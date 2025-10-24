@@ -1,26 +1,20 @@
 "use client";
 
 import { useEffect, useMemo, useState } from 'react';
-import { format } from 'date-fns';
+import { Pie, PieChart as RPieChart, Label as RechartsLabel, Bar as RBar, BarChart as RBarChart, CartesianGrid as RCartesianGrid, XAxis as RXAxis, YAxis as RYAxis, LineChart as RLineChart, Line as RLine, Tooltip as RTooltip, ResponsiveContainer as RResponsiveContainer, Cell as RCell } from 'recharts';
+import { ChartContainer } from '@/components/ui/chart';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Button } from '@/components/ui/button';
-import { Calendar as CalendarIcon } from 'lucide-react';
-import {
-  Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  BarElement,
-  ArcElement,
-  LineElement,
-  PointElement,
-  Tooltip,
-  Legend,
-  Filler,
-} from 'chart.js';
-import { Bar, Doughnut, Line } from 'react-chartjs-2';
+import { ChevronDownIcon } from 'lucide-react';
+import { type DateRange } from 'react-day-picker';
+import { Label } from '@/components/ui/label';
+import { Filter, BarChart3, PieChart, TrendingUp, FileText, Clock, Database, Search, X } from 'lucide-react';
+import { formatDateRange } from 'little-date';
 
-ChartJS.register(CategoryScale, LinearScale, BarElement, ArcElement, LineElement, PointElement, Tooltip, Legend, Filler);
+ 
 
 type Aggregations = {
   csv_path: string;
@@ -38,13 +32,11 @@ type ItemsResp = {
 };
 
 const palette = [
-  '#0ea5e9', '#22c55e', '#f59e0b', '#ef4444', '#8b5cf6',
-  '#14b8a6', '#f43f5e', '#10b981', '#a855f7', '#6366f1',
+  '#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6',
+  '#06b6d4', '#f97316', '#84cc16', '#ec4899', '#6366f1',
 ];
 
-const gridColor = 'rgba(0,0,0,0.06)';
-const axisColor = '#6b7280';
-const borderColor = 'rgba(0,0,0,0.1)';
+ 
 
 export default function Page() {
   const [csvPath, setCsvPath] = useState<string>('');
@@ -53,7 +45,29 @@ export default function Page() {
   const [filters, setFilters] = useState<{ section: string; category: string; q: string; startYm: string; endYm: string }>({ section: '', category: '', q: '', startYm: '', endYm: '' });
   const [pagination, setPagination] = useState<{ limit: number; offset: number }>({ limit: 20, offset: 0 });
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
-  const isCategoryFiltered = !!filters.category;
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [dateRange, setDateRange] = useState<DateRange | undefined>(undefined);
+  const dataYears = useMemo(() => {
+    const labels = agg?.by_year_month?.labels || [];
+    const years = labels.map(l => Number(String(l).slice(0,4))).filter(n => !Number.isNaN(n));
+    const minY = years.length ? Math.min(...years) : new Date().getFullYear() - 5;
+    const maxY = years.length ? Math.max(...years) : new Date().getFullYear();
+    return { minY, maxY };
+  }, [agg]);
+
+  const getStableColor = (label: string) => {
+    const key = (label || '').toLowerCase();
+    const stableSections = Array.from(new Set([...(agg?.facets?.sections || []), 'news', 'insights', 'success-stories', 'publications']
+      .filter(Boolean)
+      .map((s) => String(s).toLowerCase())));
+    const idx = stableSections.indexOf(key);
+    if (idx >= 0) return palette[idx % palette.length];
+    const hash = Array.from(key).reduce((a, c) => a + c.charCodeAt(0), 0);
+    return palette[hash % palette.length];
+  };
+
+ 
 
   const formatSectionLabel = (val: string) => {
     const v = (val || '').toLowerCase();
@@ -62,6 +76,11 @@ export default function Page() {
   };
 
   useEffect(() => {
+    const fetchData = async () => {
+      setIsLoading(true);
+      setError(null);
+      
+      try {
     const url = new URL(window.location.href);
     const csv = url.searchParams.get('csv') || '';
     setCsvPath(csv);
@@ -78,315 +97,127 @@ export default function Page() {
     itemParams.set('offset', String(pagination.offset));
     const itemsUrl = `/api/items?${itemParams.toString()}`;
 
-    Promise.all([
+        const [aggResponse, itemsResponse] = await Promise.all([
       fetch(aggUrl),
       fetch(itemsUrl),
-    ])
-      .then(async ([a, i]) => [await a.json(), await i.json()])
-      .then(([a, i]) => {
-        setAgg(a);
-        setItems(i);
-      })
-      .catch(console.error);
+        ]);
+
+        if (!aggResponse.ok || !itemsResponse.ok) {
+          throw new Error(`API request failed: ${aggResponse.status} ${itemsResponse.status}`);
+        }
+
+        const [aggData, itemsData] = await Promise.all([
+          aggResponse.json(),
+          itemsResponse.json(),
+        ]);
+
+        setAgg(aggData);
+        setItems(itemsData);
+      } catch (error) {
+        console.error('Error fetching data:', error);
+        setError(error instanceof Error ? error.message : 'Failed to load data');
+        // Set empty data on error to prevent UI crashes
+        setAgg({
+          csv_path: '',
+          total: 0,
+          by_category: [],
+          by_section: [],
+          by_year_month: { labels: [], counts: [] },
+          monthly_by_section: { labels: [], series: {} },
+          facets: { sections: [], categories: [] },
+        });
+        setItems({ total: 0, items: [] });
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchData();
   }, [filters, pagination]);
 
-  const barOptions = {
-    responsive: true,
-    maintainAspectRatio: false,
-    scales: {
-      x: {
-        grid: { color: gridColor, drawBorder: false },
-        ticks: { color: axisColor, font: { size: 11 } },
-        border: { color: borderColor },
-      },
-      y: {
-        grid: { color: gridColor, drawBorder: false },
-        ticks: { color: axisColor, font: { size: 11 }, precision: 0 },
-        border: { color: borderColor },
-        beginAtZero: true,
-      },
-    },
-    plugins: {
-      legend: { display: false },
-      tooltip: {
-        backgroundColor: 'rgba(17,24,39,0.9)',
-        titleColor: '#fff',
-        bodyColor: '#e5e7eb',
-        displayColors: false,
-      },
-    },
-  } as const;
+ 
 
-  const doughnutOptions = {
-    responsive: true,
-    maintainAspectRatio: false,
-    cutout: '65%',
-    plugins: {
-      legend: { 
-        position: 'bottom' as const, 
-        labels: { 
-          color: axisColor, 
-          boxWidth: 10, 
-          boxHeight: 10,
-          padding: 8,
-          font: { size: 10 }
-        } 
-      },
-      tooltip: {
-        backgroundColor: 'rgba(17,24,39,0.9)',
-        titleColor: '#fff',
-        bodyColor: '#e5e7eb',
-        displayColors: false,
-      },
-    },
-  };
+  const LoadingSpinner = () => (
+    <div className="flex items-center justify-center p-8">
+      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+    </div>
+  );
 
-  const lineOptions = {
-    responsive: true,
-    maintainAspectRatio: false,
-    scales: {
-      x: {
-        grid: { color: gridColor, drawBorder: false },
-        ticks: { 
-          color: axisColor, 
-          font: { size: 9 },
-          maxRotation: 45,
-          minRotation: 45,
-          autoSkip: true,
-          maxTicksLimit: 12
-        },
-        border: { color: borderColor },
-      },
-      y: {
-        grid: { color: gridColor, drawBorder: false },
-        ticks: { color: axisColor, font: { size: 9 }, precision: 0 },
-        border: { color: borderColor },
-        beginAtZero: true,
-      },
-    },
-    plugins: {
-      legend: { display: false },
-      tooltip: {
-        backgroundColor: 'rgba(17,24,39,0.9)',
-        titleColor: '#fff',
-        bodyColor: '#e5e7eb',
-        displayColors: false,
-      },
-    },
-  } as const;
-
-  const catData = useMemo(() => {
-    if (!agg) return null;
-    const topN = 8;
-    const sorted = [...agg.by_category].sort((a, b) => b.count - a.count);
-    const top = sorted.slice(0, topN);
-    const others = sorted.slice(topN);
-    const othersTotal = others.reduce((sum, d) => sum + d.count, 0);
-    const labels = [...top.map(d => d.label), ...(othersTotal > 0 ? ['Others'] : [])];
-    const counts = [...top.map(d => d.count), ...(othersTotal > 0 ? [othersTotal] : [])];
-    return {
-      labels,
-      datasets: [{
-        label: 'Items',
-        data: counts,
-        backgroundColor: labels.map((_, i) => palette[i % palette.length] + 'CC'),
-        borderColor: labels.map((_, i) => palette[i % palette.length]),
-        borderWidth: 1,
-      }]
-    };
-  }, [agg]);
-
-  const catBarOptions = useMemo(() => ({
-    responsive: true,
-    maintainAspectRatio: false,
-    indexAxis: 'y' as const,
-    scales: {
-      x: {
-        grid: { color: gridColor, drawBorder: false },
-        ticks: { color: axisColor, font: { size: 10 }, precision: 0 },
-        border: { color: borderColor },
-        beginAtZero: true,
-      },
-      y: {
-        grid: { color: gridColor, drawBorder: false },
-        ticks: { color: axisColor, font: { size: 10 }, callback: (v: any, i: number, ticks: any[]) => {
-          const label = (catData?.labels?.[i] || '') as string;
-          // Adjust max length based on screen size
-          const maxLen = window.innerWidth < 640 ? 25 : 42;
-          return label.length > maxLen ? label.slice(0, maxLen - 1) + '…' : label;
-        } },
-        border: { color: borderColor },
-      },
-    },
-    plugins: {
-      legend: { display: false },
-      tooltip: {
-        backgroundColor: 'rgba(17,24,39,0.9)',
-        titleColor: '#fff',
-        bodyColor: '#e5e7eb',
-        displayColors: true,
-        callbacks: {
-          title: (items: any[]) => items?.[0]?.label || '',
-        },
-      },
-    },
-  }), [catData]);
-
-  const secData = useMemo(() => {
-    if (!agg) return null;
-    const labels = agg.by_section.map(d => d.label);
-    const counts = agg.by_section.map(d => d.count);
-    return {
-      labels,
-      datasets: [{
-        data: counts,
-        backgroundColor: labels.map((_, i) => palette[i % palette.length] + 'CC'),
-        borderWidth: 0,
-        hoverOffset: 8,
-        spacing: 2,
-      }]
-    };
-  }, [agg]);
-
-  const monthlyStackedData = useMemo(() => {
-    if (!agg || !agg.monthly_by_section) return null;
-    const labels = agg.monthly_by_section.labels;
-    const sections = Object.keys(agg.monthly_by_section.series).sort();
-    const datasets = sections.map((sec, i) => ({
-      label: sec,
-      data: agg.monthly_by_section!.series[sec],
-      backgroundColor: (palette[i % palette.length] + 'B3'),
-      borderColor: palette[i % palette.length],
-      borderWidth: 1,
-      stack: 'sections',
-    }));
-    return { labels, datasets };
-  }, [agg]);
-
-  const stackedBarOptions = useMemo(() => ({
-    responsive: true,
-    maintainAspectRatio: false,
-    scales: {
-      x: {
-        stacked: true,
-        grid: { color: gridColor, drawBorder: false },
-        ticks: { 
-          color: axisColor, 
-          font: { size: 9 },
-          maxRotation: 45,
-          minRotation: 45,
-          autoSkip: true,
-          maxTicksLimit: 12
-        },
-        border: { color: borderColor },
-      },
-      y: {
-        stacked: true,
-        grid: { color: gridColor, drawBorder: false },
-        ticks: { color: axisColor, font: { size: 9 }, precision: 0 },
-        border: { color: borderColor },
-        beginAtZero: true,
-      },
-    },
-    plugins: {
-      legend: { 
-        position: 'bottom' as const,
-        labels: {
-          font: { size: 10 },
-          padding: 8,
-          boxWidth: 10,
-          boxHeight: 10
-        }
-      },
-      tooltip: {
-        backgroundColor: 'rgba(17,24,39,0.9)',
-        titleColor: '#fff',
-        bodyColor: '#e5e7eb',
-        displayColors: true,
-      },
-    },
-  }), []);
-
-  const sectionBarForCategory = useMemo(() => {
-    if (!agg) return null;
-    const labels = agg.by_section.map(d => d.label);
-    const counts = agg.by_section.map(d => d.count);
-    return {
-      labels,
-      datasets: [{
-        label: 'Items',
-        data: counts,
-        backgroundColor: labels.map((_, i) => palette[i % palette.length] + 'CC'),
-        borderColor: labels.map((_, i) => palette[i % palette.length]),
-        borderWidth: 1,
-      }]
-    };
-  }, [agg]);
-
-  const timeData = useMemo(() => {
-    if (!agg) return null;
-    const labels = agg.by_year_month.labels;
-    const counts = agg.by_year_month.counts;
-    return {
-      labels,
-      datasets: [{
-        label: 'Items',
-        data: counts,
-        borderColor: '#2563eb',
-        backgroundColor: (ctx: any) => {
-          const { chart } = ctx;
-          const { ctx: c, chartArea } = chart;
-          if (!chartArea) return '#93c5fd66';
-          const gradient = c.createLinearGradient(0, chartArea.top, 0, chartArea.bottom);
-          gradient.addColorStop(0, 'rgba(37,99,235,0.25)');
-          gradient.addColorStop(1, 'rgba(37,99,235,0.05)');
-          return gradient;
-        },
-        pointRadius: 2,
-        pointHoverRadius: 4,
-        borderWidth: 2,
-        tension: 0.35,
-        fill: true,
-      }]
-    };
-  }, [agg]);
+  const ErrorMessage = ({ message }: { message: string }) => (
+    <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
+      <div className="flex items-center">
+        <svg className="w-5 h-5 text-red-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+        <span className="text-red-800 font-medium">Error loading data</span>
+      </div>
+      <p className="text-red-700 text-sm mt-1">{message}</p>
+    </div>
+  );
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-6 py-4 sm:py-6">
-        <header className="mb-4 sm:mb-6">
-          <h1 className="text-xl sm:text-2xl font-bold text-gray-900">FAO Gender Dashboard</h1>
-          <p className="text-xs sm:text-sm text-gray-600 mt-1">
-            <span className="hidden sm:inline">JSON source: </span>
-            <span className="font-mono text-xs">{csvPath || 'default'}</span>
-          </p>
-        </header>
+    <div className="min-h-screen bg-background">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10">
+        {/* Combined Header & Filters */}
+        <Card className="mb-6">
+          <CardHeader className="pb-4">
+            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+              {/* Header Section */}
+              <div className="flex items-center gap-4">
+                <div className="w-10 h-10 bg-gradient-to-br from-primary to-primary/80 rounded-lg flex items-center justify-center">
+                  <BarChart3 className="w-5 h-5 text-primary-foreground" />
+                </div>
+                <div>
+                  <CardTitle className="text-xl sm:text-2xl font-bold">FAO Gender Dashboard</CardTitle>
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <Database className="w-3 h-3" />
+                    <span className="font-mono text-xs bg-muted px-2 py-0.5 rounded">{csvPath || 'default dataset'}</span>
+                    {isLoading && (
+                      <div className="flex items-center gap-1 text-primary">
+                        <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-primary"></div>
+                        <span className="text-xs">Loading...</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
 
         {/* Mobile Filter Toggle */}
-        <div className="md:hidden mb-4">
-          <button
+              <div className="lg:hidden">
+                <Button
+                  variant="outline"
             onClick={() => setMobileFiltersOpen(!mobileFiltersOpen)}
-            className="w-full flex items-center justify-between bg-white rounded-lg shadow px-4 py-3 text-sm font-medium text-gray-700"
+                  className="w-full justify-between"
+                  aria-expanded={mobileFiltersOpen}
+                  aria-controls="mobile-filters"
           >
             <span className="flex items-center gap-2">
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
-              </svg>
-              Filters
+                    <Filter className="w-4 h-4" />
+                    <span>Filters</span>
             </span>
-            <svg className={`w-5 h-5 transition-transform ${mobileFiltersOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className={`w-4 h-4 transition-transform duration-200 ${mobileFiltersOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
             </svg>
-          </button>
+                </Button>
+              </div>
         </div>
+          </CardHeader>
 
         {/* Filters Section */}
-        <section className={`bg-white rounded-lg shadow p-3 sm:p-4 mb-4 sm:mb-6 ${mobileFiltersOpen ? 'block' : 'hidden'} md:block`}>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
+          <CardContent id="mobile-filters" className={`pt-0 ${mobileFiltersOpen ? 'block' : 'hidden'} lg:block`}>
+            <div className="space-y-3 sm:space-y-4">
+              {/* Main Filters Row */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-2 sm:gap-3">
             <div>
-              <label className="block text-xs text-gray-600 mb-1 font-medium">Section</label>
-              <select className="w-full border border-gray-300 rounded-md px-2 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500" value={filters.section} onChange={e => setFilters(s => ({ ...s, section: e.target.value }))}>
-                <option value="">All</option>
+                  <Label htmlFor="section" className="text-[13px] sm:text-sm font-medium">Section</Label>
+                  <select 
+                    id="section"
+                    className="w-full mt-1 border border-input rounded-md px-3 py-2 text-[15px] sm:text-base focus:ring-2 focus:ring-ring focus:border-ring transition-colors bg-background" 
+                    value={filters.section} 
+                    onChange={e => setFilters(s => ({ ...s, section: e.target.value }))}
+                    aria-label="Filter by section"
+                  >
+                    <option value="">All Sections</option>
                 {Array.from(new Set([...(agg?.facets?.sections || []), 'news', 'insights', 'success-stories', 'publications']
                   .filter(Boolean)
                   .map((s) => String(s).toLowerCase())))
@@ -397,204 +228,595 @@ export default function Page() {
               </select>
             </div>
             <div>
-              <label className="block text-xs text-gray-600 mb-1 font-medium">Category</label>
-              <select className="w-full border border-gray-300 rounded-md px-2 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500" value={filters.category} onChange={e => setFilters(s => ({ ...s, category: e.target.value }))}>
-                <option value="">All</option>
+                  <Label htmlFor="category" className="text-[13px] sm:text-sm font-medium">Category</Label>
+                  <select 
+                    id="category"
+                    className="w-full mt-1 border border-input rounded-md px-3 py-2 text-[15px] sm:text-base focus:ring-2 focus:ring-ring focus:border-ring transition-colors bg-background" 
+                    value={filters.category} 
+                    onChange={e => setFilters(s => ({ ...s, category: e.target.value }))}
+                    aria-label="Filter by category"
+                  >
+                    <option value="">All Categories</option>
                 {agg?.facets?.categories?.map((c) => (<option key={c} value={c.toLowerCase()}>{c}</option>))}
               </select>
             </div>
-            <div className="sm:col-span-2 lg:col-span-1">
-              <label className="block text-xs text-gray-600 mb-1 font-medium">Query</label>
-              <input className="w-full border border-gray-300 rounded-md px-2 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="Search..." value={filters.q} onChange={e => setFilters(s => ({ ...s, q: e.target.value }))} />
+                <div className="sm:col-span-2 lg:col-span-2">
+                  <Label htmlFor="search" className="text-[13px] sm:text-sm font-medium">Search</Label>
+                  <div className="relative mt-1">
+                    <Input 
+                      id="search"
+                      className="pl-9 h-10 text-[15px]" 
+                      placeholder="Search content..." 
+                      value={filters.q} 
+                      onChange={e => setFilters(s => ({ ...s, q: e.target.value }))}
+                      aria-label="Search content"
+                    />
+                    <Search className="absolute left-2.5 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                  </div>
             </div>
-            <div>
-              <label className="block text-xs text-gray-600 mb-1 font-medium">Start</label>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button variant="outline" className="w-full justify-start">
-                    <CalendarIcon className="mr-2 h-4 w-4" />
-                    {filters.startYm ? filters.startYm : 'YYYY-MM'}
+                <div className="lg:col-span-2">
+                  <Label htmlFor="dates" className="text-[13px] sm:text-sm font-medium">Date Range</Label>
+                  <div className="mt-1">
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button
+                          variant="outline"
+                          id="dates"
+                          className="w-full justify-between font-normal h-10 text-[15px]"
+                        >
+                          {dateRange?.from && dateRange?.to
+                            ? formatDateRange(dateRange.from, dateRange.to, { includeTime: false })
+                            : "Select date"}
+                          <ChevronDownIcon className="w-4 h-4" />
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto overflow-hidden p-0" align="start">
+                        <Calendar
+                          mode="range"
+                          selected={dateRange}
+                          captionLayout="dropdown"
+                          numberOfMonths={1}
+                          fromYear={dataYears.minY}
+                          toYear={dataYears.maxY}
+                          onSelect={(range: DateRange | undefined) => {
+                            setDateRange(range)
+                            if (!range?.from || !range?.to) {
+                              setFilters((s)=>({ ...s, startYm: '', endYm: '' }))
+                              return
+                            }
+                            const startYm = `${range.from.getFullYear()}-${String(range.from.getMonth()+1).padStart(2,'0')}`
+                            const endYm = `${range.to.getFullYear()}-${String(range.to.getMonth()+1).padStart(2,'0')}`
+                            setFilters((s)=>({ ...s, startYm, endYm }))
+                          }}
+                        />
+                      </PopoverContent>
+                    </Popover>
+                  </div>
+                </div>
+          </div>
+              
+              {/* Quick Presets & Clear */}
+              <div className="flex flex-wrap items-center justify-between gap-2 sm:gap-3 pt-3 border-t">
+                <div className="flex flex-wrap gap-1">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="h-7 px-2 text-xs"
+                    onClick={() => {
+                      const now = new Date();
+                      const lastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+                      const startYm = `${lastMonth.getFullYear()}-${String(lastMonth.getMonth() + 1).padStart(2, '0')}`;
+                      const endYm = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+                      setFilters(s => ({ ...s, startYm, endYm }));
+                    }}
+                  >
+                    Last Month
                   </Button>
-                </PopoverTrigger>
-                <PopoverContent align="start" className="p-0">
-                  <Calendar
-                    mode="single"
-                    selected={filters.startYm ? new Date(filters.startYm + '-01') : undefined}
-                    onSelect={(d) => setFilters(s => ({ ...s, startYm: d ? format(d, 'yyyy-MM') : '' }))}
-                    initialFocus
-                  />
-                </PopoverContent>
-              </Popover>
-            </div>
-            <div>
-              <label className="block text-xs text-gray-600 mb-1 font-medium">End</label>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button variant="outline" className="w-full justify-start">
-                    <CalendarIcon className="mr-2 h-4 w-4" />
-                    {filters.endYm ? filters.endYm : 'YYYY-MM'}
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="h-7 px-2 text-xs"
+                    onClick={() => {
+                      const now = new Date();
+                      const threeMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 3, 1);
+                      const startYm = `${threeMonthsAgo.getFullYear()}-${String(threeMonthsAgo.getMonth() + 1).padStart(2, '0')}`;
+                      const endYm = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+                      setFilters(s => ({ ...s, startYm, endYm }));
+                    }}
+                  >
+                    Last 3M
                   </Button>
-                </PopoverTrigger>
-                <PopoverContent align="start" className="p-0">
-                  <Calendar
-                    mode="single"
-                    selected={filters.endYm ? new Date(filters.endYm + '-01') : undefined}
-                    onSelect={(d) => setFilters(s => ({ ...s, endYm: d ? format(d, 'yyyy-MM') : '' }))}
-                    initialFocus
-                  />
-                </PopoverContent>
-              </Popover>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="h-7 px-2 text-xs"
+                    onClick={() => {
+                      const now = new Date();
+                      const sixMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 6, 1);
+                      const startYm = `${sixMonthsAgo.getFullYear()}-${String(sixMonthsAgo.getMonth() + 1).padStart(2, '0')}`;
+                      const endYm = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+                      setFilters(s => ({ ...s, startYm, endYm }));
+                    }}
+                  >
+                    Last 6M
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="h-7 px-2 text-xs"
+                    onClick={() => {
+                      const now = new Date();
+                      const oneYearAgo = new Date(now.getFullYear() - 1, now.getMonth(), 1);
+                      const startYm = `${oneYearAgo.getFullYear()}-${String(oneYearAgo.getMonth() + 1).padStart(2, '0')}`;
+                      const endYm = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+                      setFilters(s => ({ ...s, startYm, endYm }));
+                    }}
+                  >
+                    Last Year
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="h-7 px-2 text-xs"
+                    onClick={() => {
+                      const now = new Date();
+                      const startYm = `${now.getFullYear()}-01`;
+                      const endYm = `${now.getFullYear()}-12`;
+                      setFilters(s => ({ ...s, startYm, endYm }));
+                    }}
+                  >
+                    This Year
+                  </Button>
+                </div>
+                {(filters.section || filters.category || filters.q || filters.startYm || filters.endYm) && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => { setFilters({ section: '', category: '', q: '', startYm: '', endYm: '' }); setPagination(p => ({ ...p, offset: 0 })); setMobileFiltersOpen(false); }}
+                    className="text-destructive hover:text-destructive h-7 px-2 text-xs"
+                  >
+                    <X className="w-3 h-3 mr-1" />
+                    Clear
+                  </Button>
+                )}
+              </div>
+
+              {/* Active filter chips (sticky on mobile) */}
+              {(filters.section || filters.category || filters.q || filters.startYm || filters.endYm) && (
+                <div className="md:static md:bg-transparent md:shadow-none md:backdrop-blur-0 md:py-0 md:mt-3 sticky top-0 z-30 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80 py-2 mt-3 -mx-4 px-4 sm:m-0 sm:p-0 flex flex-wrap gap-2">
+                  {filters.section && (
+                    <button
+                      className="px-2 py-1 rounded-full bg-blue-50 text-blue-700 text-xs flex items-center gap-1"
+                      onClick={() => setFilters((s)=>({ ...s, section: '' }))}
+                      aria-label="Clear section filter"
+                    >
+                      Section: {formatSectionLabel(filters.section)}
+                      <X className="w-3 h-3" />
+                    </button>
+                  )}
+                  {filters.category && (
+                    <button
+                      className="px-2 py-1 rounded-full bg-emerald-50 text-emerald-700 text-xs flex items-center gap-1"
+                      onClick={() => setFilters((s)=>({ ...s, category: '' }))}
+                      aria-label="Clear category filter"
+                    >
+                      Category: {filters.category}
+                      <X className="w-3 h-3" />
+                    </button>
+                  )}
+                  {filters.q && (
+                    <button
+                      className="px-2 py-1 rounded-full bg-zinc-100 text-zinc-700 text-xs flex items-center gap-1"
+                      onClick={() => setFilters((s)=>({ ...s, q: '' }))}
+                      aria-label="Clear search filter"
+                    >
+                      Search: {filters.q}
+                      <X className="w-3 h-3" />
+                    </button>
+                  )}
+                  {(filters.startYm || filters.endYm) && (
+                    <button
+                      className="px-2 py-1 rounded-full bg-purple-50 text-purple-700 text-xs flex items-center gap-1"
+                      onClick={() => setFilters((s)=>({ ...s, startYm: '', endYm: '' }))}
+                      aria-label="Clear date range filter"
+                    >
+                      {filters.startYm || '…'} – {filters.endYm || '…'}
+                      <X className="w-3 h-3" />
+                    </button>
+                  )}
+                </div>
+              )}
             </div>
-          </div>
-          {(filters.section || filters.category || filters.q || filters.startYm || filters.endYm) && (
-            <button
-              className="mt-3 text-xs text-blue-600 hover:text-blue-700 font-medium"
-              onClick={() => { setFilters({ section: '', category: '', q: '', startYm: '', endYm: '' }); setPagination(p => ({ ...p, offset: 0 })); setMobileFiltersOpen(false); }}
-            >Clear all filters</button>
-          )}
-        </section>
+          </CardContent>
+        </Card>
 
-        {/* Stats Cards */}
-        <section className="mb-4 sm:mb-6 grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-          <div className="bg-white rounded-lg shadow p-3 sm:p-4">
-            <div className="text-xs text-gray-500 mb-1">Total Items</div>
-            <div className="text-xl sm:text-2xl font-semibold text-gray-900">{agg?.total ?? 0}</div>
-          </div>
-          <div className="bg-white rounded-lg shadow p-3 sm:p-4">
-            <div className="text-xs text-gray-500 mb-1">Sections</div>
-            <div className="text-xl sm:text-2xl font-semibold text-gray-900">{agg?.facets?.sections?.length ?? 0}</div>
-          </div>
-          <div className="bg-white rounded-lg shadow p-3 sm:p-4">
-            <div className="text-xs text-gray-500 mb-1">Categories</div>
-            <div className="text-xl sm:text-2xl font-semibold text-gray-900">{agg?.facets?.categories?.length ?? 0}</div>
-          </div>
-          <div className="bg-white rounded-lg shadow p-3 sm:p-4">
-            <div className="text-xs text-gray-500 mb-1">Months</div>
-            <div className="text-xl sm:text-2xl font-semibold text-gray-900">{agg?.by_year_month?.labels?.length ?? 0}</div>
-          </div>
-        </section>
+        {error && <ErrorMessage message={error} />}
 
-        {/* Charts Section */}
-        <section className="mb-4 sm:mb-6 grid grid-cols-1 lg:grid-cols-3 gap-4">
-          <div className="bg-white rounded-lg shadow p-4 sm:p-6 h-80 sm:h-96">
-            <div className="flex items-center justify-between mb-2">
-              <h2 className="text-sm font-semibold text-gray-700">{isCategoryFiltered ? 'Sections for Category' : 'Top Categories'}</h2>
+        {/* Enhanced Stats Cards */}
+        <div className="mb-6 grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
+          <Card className="hover:shadow-lg transition-shadow duration-200">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm sm:text-base text-muted-foreground mb-2 font-medium">Total Items</p>
+                  <p className="text-2xl sm:text-3xl font-bold">{agg?.total ?? 0}</p>
+                </div>
+                <div className="w-12 h-12 sm:w-16 sm:h-16 bg-primary/10 rounded-xl flex items-center justify-center">
+                  <FileText className="w-6 h-6 sm:w-8 sm:h-8 text-primary" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+          <Card className="hover:shadow-lg transition-shadow duration-200">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm sm:text-base text-muted-foreground mb-2 font-medium">Sections</p>
+                  <p className="text-2xl sm:text-3xl font-bold">{agg?.facets?.sections?.length ?? 0}</p>
+                </div>
+                <div className="w-12 h-12 sm:w-16 sm:h-16 bg-green-500/10 rounded-xl flex items-center justify-center">
+                  <BarChart3 className="w-6 h-6 sm:w-8 sm:h-8 text-green-600" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+          <Card className="hover:shadow-lg transition-shadow duration-200">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm sm:text-base text-muted-foreground mb-2 font-medium">Categories</p>
+                  <p className="text-2xl sm:text-3xl font-bold">{agg?.facets?.categories?.length ?? 0}</p>
+                </div>
+                <div className="w-12 h-12 sm:w-16 sm:h-16 bg-orange-500/10 rounded-xl flex items-center justify-center">
+                  <PieChart className="w-6 h-6 sm:w-8 sm:h-8 text-orange-600" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+          <Card className="hover:shadow-lg transition-shadow duration-200">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm sm:text-base text-muted-foreground mb-2 font-medium">Time Period</p>
+                  <p className="text-2xl sm:text-3xl font-bold">{agg?.by_year_month?.labels?.length ?? 0}</p>
+                  <p className="text-sm text-muted-foreground mt-1">months</p>
+          </div>
+                <div className="w-12 h-12 sm:w-16 sm:h-16 bg-purple-500/10 rounded-xl flex items-center justify-center">
+                  <Clock className="w-6 h-6 sm:w-8 sm:h-8 text-purple-600" />
+          </div>
+          </div>
+            </CardContent>
+          </Card>
+          </div>
+
+        {/* Single Row Visuals: Section Overview (Pie via Recharts) + Radar (Recharts) */}
+        <div className="mb-6 grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-8">
+          {/* Sections Overview Pie (Recharts) */}
+          <Card>
+            <CardHeader className="pb-2">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <div className="w-6 h-6 bg-green-500/10 rounded-lg flex items-center justify-center">
+                    <PieChart className="w-4 h-4 text-green-600" />
+                  </div>
+                  <CardTitle className="text-base sm:text-xl font-semibold">Sections Overview</CardTitle>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent className="pt-0 px-2 sm:px-4">
+              {isLoading ? (
+                <LoadingSpinner />
+              ) : (
+                (() => {
+                  const labels = agg?.by_section?.map((d) => d.label) || [];
+                  const data = (agg?.by_section || []).map((d) => ({ name: d.label, value: d.count, fill: getStableColor(String(d.label)) }))
+                  const total = data.reduce((a, c) => a + c.value, 0)
+                  return (
+                    <div className="mx-auto max-w-full overflow-hidden rounded-md">
+                      <div className="h-[16rem] sm:h-[20rem] lg:h-[24rem]">
+                        <RResponsiveContainer width="100%" height="100%">
+                         <RPieChart margin={{ top: 12, right: 12, bottom: 12, left: 12 }}>
+                        <RTooltip formatter={(value: any, _name: any, item: any) => {
+                          return [String(value), item?.payload?.name || ''];
+                        }} />
+                          <Pie
+                          data={data}
+                          dataKey="value"
+                          nameKey="name"
+                              innerRadius={65}
+                              outerRadius={"75%"}
+                          strokeWidth={4}
+                        >
+                          {data.map((entry, index) => (
+                            <RCell key={`cell-${index}`} fill={entry.fill} stroke={entry.fill} />
+                          ))}
+                          <RechartsLabel
+                            content={({ viewBox }: any) => {
+                              if (viewBox && 'cx' in viewBox && 'cy' in viewBox) {
+                                return (
+                                    <text x={viewBox.cx} y={viewBox.cy} textAnchor="middle" dominantBaseline="middle" className="scale-90 sm:scale-100">
+                                      <tspan x={viewBox.cx} y={viewBox.cy} className="fill-foreground text-2xl sm:text-3xl font-bold">{total}</tspan>
+                                      <tspan x={viewBox.cx} y={(viewBox.cy || 0) + 18} className="fill-muted-foreground text-xs sm:text-sm">items</tspan>
+                                  </text>
+                                )
+                              }
+                              return null
+                            }}
+                          />
+                          </Pie>
+                        </RPieChart>
+                        </RResponsiveContainer>
+                      </div>
+                      {/* Mobile legend */}
+                      <div className="mt-3 sm:hidden text-xs text-muted-foreground flex flex-wrap gap-2">
+                        {data.slice(0, 6).map((d, i) => (
+                          <span key={i} className="inline-flex items-center gap-1">
+                            <span className="inline-block w-2.5 h-2.5 rounded" style={{ backgroundColor: d.fill }} />
+                            {formatSectionLabel(String(d.name))}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )
+                })()
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Category Coverage Bar (Recharts) */}
+          <Card>
+            <CardHeader className="pb-2">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <div className="w-6 h-6 bg-primary/10 rounded-lg flex items-center justify-center">
+                    <TrendingUp className="w-4 h-4 text-primary" />
+                  </div>
+                  <CardTitle className="text-base sm:text-xl font-semibold">Category Coverage</CardTitle>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent className="pt-0 px-2 sm:px-4">
+              {isLoading ? (
+                <LoadingSpinner />
+              ) : (
+                (() => {
+                  const topCats = (agg?.by_category || []).slice().sort((a,b)=>b.count-a.count).slice(0,8)
+                  const data = topCats.map((c,i)=>({ label: c.label, value: c.count, fill: palette[i % palette.length] }))
+                  const config = Object.fromEntries(
+                    data.map((d, i) => [
+                      `bar${i+1}`,
+                      { color: palette[i % palette.length] }
+                    ])
+                  ) as any
+                  return (
+                    <ChartContainer config={config} className="mx-auto w-full overflow-hidden rounded-md">
+                      <div className="h-[16rem] sm:h-[20rem] lg:h-[24rem]">
+                        <RResponsiveContainer width="100%" height="100%">
+                          <RBarChart data={data} layout="vertical" margin={{ right: 12, left: 12 }} barCategoryGap={"30%"}>
+                            <RCartesianGrid horizontal={false} />
+                            <RYAxis dataKey="label" type="category" tickLine={false} tickMargin={10} axisLine={false} hide />
+                            <RXAxis dataKey="value" type="number" hide />
+                            <RTooltip 
+                              formatter={(value: any) => [String(value), 'Items']}
+                              labelFormatter={(_label: any, payload: any) => {
+                                const p = Array.isArray(payload) ? payload[0] : payload;
+                                return String(p?.payload?.label || '');
+                              }}
+                            />
+                            <RBar dataKey="value" radius={4} />
+                          </RBarChart>
+                        </RResponsiveContainer>
+                      </div>
+                      {/* Mobile hint */}
+                      <div className="mt-2 sm:hidden text-xs text-muted-foreground">Top categories by count</div>
+                    </ChartContainer>
+                  )
+                })()
+              )}
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Total Articles by Month - full width line chart */}
+        <Card className="mb-6">
+          <CardHeader className="pb-3">
+            <div className="flex items-center gap-2">
+              <div className="w-6 h-6 bg-purple-500/10 rounded-lg flex items-center justify-center">
+                <TrendingUp className="w-4 h-4 text-purple-600" />
+              </div>
+              <CardTitle className="text-xl font-semibold">Total Articles by Month</CardTitle>
             </div>
-            {!isCategoryFiltered && catData && <Bar data={catData} options={catBarOptions} />}
-            {isCategoryFiltered && sectionBarForCategory && <Bar data={sectionBarForCategory} options={catBarOptions} />}
-          </div>
-          <div className="bg-white rounded-lg shadow p-4 sm:p-6 h-80 sm:h-96">
-            <h2 className="text-sm font-semibold text-gray-700 mb-2">By Section</h2>
-            {secData && <Doughnut data={secData} options={doughnutOptions} />} 
-          </div>
-          <div className="bg-white rounded-lg shadow p-4 sm:p-6 h-80 sm:h-96">
-            <h2 className="text-sm font-semibold text-gray-700 mb-2">By Month</h2>
-            {timeData && <Line data={timeData} options={lineOptions} />} 
-          </div>
-        </section>
+            <CardDescription>Aggregated total items per month</CardDescription>
+          </CardHeader>
+          <CardContent className="pt-0">
+            <div className="h-[14rem] sm:h-[16rem] lg:h-[20rem]">
+              {isLoading ? (
+                <LoadingSpinner />
+              ) : (
+                (() => {
+                  const labels = agg?.by_year_month?.labels || []
+                  const counts = agg?.by_year_month?.counts || []
+                  const data = labels.map((l, i) => ({ date: l + '-01', value: counts[i] || 0 }))
+                  return (
+                    <ChartContainer className="w-full h-full" config={{ line: { color: 'var(--chart-1)' } }}>
+                      <RResponsiveContainer width="100%" height="100%">
+                        <RLineChart data={data} margin={{ left: 12, right: 12 }}>
+                          <RCartesianGrid vertical={false} />
+                          <RXAxis dataKey="date" tickLine={false} axisLine={false} tickMargin={8} minTickGap={20} tickFormatter={(value: string) => {
+                            const d = new Date(value)
+                            return d.toLocaleDateString('en-US', { month: 'short', year: '2-digit' })
+                          }} />
+                          <RTooltip formatter={(v: any) => [String(v), 'Items']} labelFormatter={(value: string) => new Date(value).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })} />
+                          <RLine type="monotone" dataKey="value" stroke="var(--color-line, #2563eb)" strokeWidth={2} dot={false} />
+                        </RLineChart>
+                      </RResponsiveContainer>
+                    </ChartContainer>
+                  )
+                })()
+              )}
+            </div>
+          </CardContent>
+        </Card>
 
-        {/* Monthly Stacked Chart */}
-        <section className="mb-4 sm:mb-6 grid grid-cols-1">
-          <div className="bg-white rounded-lg shadow p-4 sm:p-6 h-80 sm:h-96">
-            <h2 className="text-sm font-semibold text-gray-700 mb-2">Monthly Items by Section</h2>
-            {monthlyStackedData && <Bar data={monthlyStackedData} options={stackedBarOptions} />}
-          </div>
-        </section>
+        {/* Enhanced Items Table/List */}
+        <Card>
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 bg-muted rounded-lg flex items-center justify-center">
+                  <FileText className="w-5 h-5 text-muted-foreground" />
+                </div>
+                <div>
+                  <CardTitle className="text-2xl font-bold">Latest Items</CardTitle>
+                  <CardDescription className="text-base">Browse and explore the latest content</CardDescription>
+                </div>
+              </div>
+              {agg && (
+              <div className="text-right">
+                <div className="text-base text-muted-foreground">Total Items</div>
+                <div className="text-2xl font-bold">{agg.total}</div>
+              </div>
+              )}
+            </div>
+          </CardHeader>
+          <CardContent>
 
-        {/* Items Table/List */}
-        <section className="bg-white rounded-lg shadow p-3 sm:p-4">
-          <div className="flex items-center justify-between mb-3">
-            <h2 className="text-sm sm:text-base font-semibold text-gray-700">Latest Items</h2>
-            {agg && <span className="text-xs sm:text-sm text-gray-600">Total: {agg.total}</span>}
-          </div>
-
-          {/* Desktop Table View */}
-          <div className="hidden md:block overflow-x-auto rounded-md border border-gray-200">
-            <table className="min-w-full text-sm">
-              <thead className="bg-gray-50 text-gray-700">
+          {/* Enhanced Desktop Table View */}
+          <div className="hidden md:block overflow-x-auto rounded-lg border border-gray-200">
+            <table className="min-w-full">
+              <thead className="bg-gray-50">
                 <tr>
-                  <th className="text-left font-semibold px-3 py-2">Section</th>
-                  <th className="text-left font-semibold px-3 py-2">Category</th>
-                  <th className="text-left font-semibold px-3 py-2">Title</th>
-                  <th className="text-left font-semibold px-3 py-2">Date</th>
-                  <th className="text-left font-semibold px-3 py-2">Link</th>
+                  <th className="text-left font-semibold px-4 py-3 text-sm text-gray-700">Section</th>
+                  <th className="text-left font-semibold px-4 py-3 text-sm text-gray-700">Category</th>
+                  <th className="text-left font-semibold px-4 py-3 text-sm text-gray-700">Title</th>
+                  <th className="text-left font-semibold px-4 py-3 text-sm text-gray-700">Date</th>
+                  <th className="text-left font-semibold px-4 py-3 text-sm text-gray-700">Action</th>
                 </tr>
               </thead>
-              <tbody>
-                {items?.items?.map((r, idx) => (
-                  <tr key={idx} className="border-b last:border-0 hover:bg-gray-50/60 transition-colors">
-                    <td className="px-3 py-2 text-gray-700">{r.section}</td>
-                    <td className="px-3 py-2 text-gray-700 text-xs">{r.category}</td>
-                    <td className="px-3 py-2 text-gray-900" title={(r.shortSummary || r.summary || '').toString()}>{r.title}</td>
-                    <td className="px-3 py-2 whitespace-nowrap text-gray-700">{r.date}</td>
-                    <td className="px-3 py-2">
-                      <a className="inline-flex items-center gap-1 text-blue-600 hover:text-blue-700 hover:underline" href={r.url} target="_blank" rel="noreferrer noopener">
-                        <span>Open</span>
-                        <svg className="w-4 h-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path d="M12.293 2.293a1 1 0 011.414 0l4 4a1 1 0 01-1.414 1.414L14 5.414V13a1 1 0 11-2 0V5.414L9.707 7.707A1 1 0 018.293 6.293l4-4z"/><path d="M3 9a2 2 0 012-2h3a1 1 0 010 2H5a1 1 0 00-1 1v5a1 1 0 001 1h10a1 1 0 001-1v-3a1 1 0 112 0v3a3 3 0 01-3 3H5a3 3 0 01-3-3V9z"/></svg>
-                      </a>
+              <tbody className="divide-y divide-gray-200">
+                {isLoading ? (
+                  <tr>
+                    <td colSpan={5} className="px-4 py-8">
+                      <LoadingSpinner />
                     </td>
                   </tr>
-                ))}
+                ) : (
+                  items?.items?.map((r, idx) => (
+                    <tr key={idx} className="hover:bg-gray-50/50 transition-colors">
+                      <td className="px-4 py-3">
+                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                          {r.section}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3 text-sm text-gray-600">{r.category}</td>
+                      <td className="px-4 py-3">
+                        <div className="text-sm font-medium text-gray-900" title={(r.shortSummary || r.summary || '').toString()}>
+                          {r.title}
+                        </div>
+                      </td>
+                      <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-600">{r.date}</td>
+                      <td className="px-4 py-3">
+                        <a 
+                          className="inline-flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded-lg transition-colors" 
+                          href={r.url} 
+                          target="_blank" 
+                          rel="noreferrer noopener"
+                          aria-label={`Open ${r.title}`}
+                        >
+                          <span>Open</span>
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                          </svg>
+                        </a>
+                      </td>
+                    </tr>
+                  ))
+                )}
               </tbody>
             </table>
           </div>
 
-          {/* Mobile Card View */}
+          {/* Enhanced Mobile Card View */}
           <div className="md:hidden space-y-3">
-            {items?.items?.map((r, idx) => (
-              <div key={idx} className="border border-gray-200 rounded-lg p-3">
-                <div className="flex items-start justify-between gap-2 mb-2">
-                  <h3 className="font-medium text-sm text-gray-900 flex-1 line-clamp-2">{r.title}</h3>
-                  <a 
-                    className="flex-shrink-0 text-blue-600 hover:text-blue-700 p-1" 
+            {isLoading ? (
+              <div className="py-6">
+                <LoadingSpinner />
+              </div>
+            ) : (
+              items?.items?.map((r, idx) => (
+                <div key={idx} className="border border-gray-200 rounded-xl p-3 hover:shadow-sm transition-shadow">
+                  <div className="flex items-start justify-between gap-2 mb-2">
+                    <h3 className="font-semibold text-gray-900 text-[15px] leading-snug flex-1 line-clamp-2">{r.title}</h3>
+                    <a 
+                      className="flex-shrink-0 text-blue-600 hover:text-blue-700 p-2 hover:bg-blue-50 rounded-lg transition-colors" 
                     href={r.url} 
                     target="_blank" 
                     rel="noreferrer noopener"
-                    aria-label="Open article"
+                      aria-label={`Open ${r.title}`}
                   >
-                    <svg className="w-5 h-5" viewBox="0 0 20 20" fill="currentColor">
-                      <path d="M11 3a1 1 0 100 2h2.586l-6.293 6.293a1 1 0 101.414 1.414L15 6.414V9a1 1 0 102 0V4a1 1 0 00-1-1h-5z" />
-                      <path d="M5 5a2 2 0 00-2 2v8a2 2 0 002 2h8a2 2 0 002-2v-3a1 1 0 10-2 0v3H5V7h3a1 1 0 000-2H5z" />
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
                     </svg>
                   </a>
                 </div>
-                <div className="flex flex-wrap gap-2 text-xs">
-                  <span className="inline-flex items-center px-2 py-1 rounded-full bg-blue-50 text-blue-700 font-medium">{r.section}</span>
-                  <span className="inline-flex items-center px-2 py-1 rounded-full bg-gray-100 text-gray-700">{r.date}</span>
+                  <div className="flex flex-wrap gap-2 mb-2">
+                    <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium bg-blue-100 text-blue-800">
+                      {r.section}
+                    </span>
+                    <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium bg-gray-100 text-gray-700">
+                      {r.date}
+                    </span>
+                  </div>
+                  <p className="text-[13px] text-gray-600 line-clamp-2">{r.category}</p>
                 </div>
-                <p className="mt-2 text-xs text-gray-600 line-clamp-2">{r.category}</p>
-              </div>
-            ))}
+              ))
+            )}
           </div>
 
-          {/* Pagination */}
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-3 mt-4 pt-3 border-t">
-            <div className="text-xs text-gray-600">
-              Showing {Math.min(pagination.offset + 1, agg?.total || 0)}–{Math.min(pagination.offset + pagination.limit, agg?.total || 0)} of {agg?.total || 0}
+          {/* Enhanced Pagination */}
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mt-6 pt-6 border-t">
+            <div className="text-sm text-muted-foreground">
+              Showing <span className="font-medium text-foreground">{Math.min(pagination.offset + 1, agg?.total || 0)}</span>–<span className="font-medium text-foreground">{Math.min(pagination.offset + pagination.limit, agg?.total || 0)}</span> of <span className="font-medium text-foreground">{agg?.total || 0}</span> items
             </div>
-            <div className="flex items-center gap-2">
-              <button
-                className="px-3 py-1.5 rounded-md text-sm border border-gray-300 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed touch-manipulation"
+            <div className="flex items-center gap-3">
+              <Button
+                variant="outline"
+                size="sm"
                 disabled={pagination.offset === 0}
                 onClick={() => setPagination(p => ({ ...p, offset: Math.max(0, p.offset - p.limit) }))}
-              >Previous</button>
-              <button
-                className="px-3 py-1.5 rounded-md text-sm border border-gray-300 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed touch-manipulation"
+                aria-label="Previous page"
+              >
+                <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                </svg>
+                Previous
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
                 disabled={(agg?.total || 0) <= (pagination.offset + pagination.limit)}
                 onClick={() => setPagination(p => ({ ...p, offset: p.offset + p.limit }))}
-              >Next</button>
+                aria-label="Next page"
+              >
+                Next
+                <svg className="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </Button>
               <select
-                className="border border-gray-300 bg-white rounded-md px-2 py-1.5 text-sm touch-manipulation"
+                className="border border-input bg-background rounded-lg px-3 py-2 text-sm font-medium focus:ring-2 focus:ring-ring focus:border-ring transition-colors"
                 value={pagination.limit}
                 onChange={(e) => setPagination({ limit: parseInt(e.target.value, 10), offset: 0 })}
+                aria-label="Items per page"
               >
-                <option value={10}>10</option>
-                <option value={20}>20</option>
-                <option value={50}>50</option>
+                <option value={10}>10 per page</option>
+                <option value={20}>20 per page</option>
+                <option value={50}>50 per page</option>
               </select>
             </div>
           </div>
-        </section>
+        </CardContent>
+      </Card>
       </div>
     </div>
   );
