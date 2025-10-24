@@ -48,6 +48,17 @@ export default function Page() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [dateRange, setDateRange] = useState<DateRange | undefined>(undefined);
+  const [urlInput, setUrlInput] = useState<string>('');
+  const [useAgent, setUseAgent] = useState<boolean>(false);
+  const [isSummarizing, setIsSummarizing] = useState<boolean>(false);
+  const [summarizeError, setSummarizeError] = useState<string | null>(null);
+  const [summaryResult, setSummaryResult] = useState<{
+    title: string;
+    url: string;
+    summary: string;
+    category: string;
+    method: 'heuristic' | 'agent';
+  } | null>(null);
   const dataYears = useMemo(() => {
     const labels = agg?.by_year_month?.labels || [];
     const years = labels.map(l => Number(String(l).slice(0,4))).filter(n => !Number.isNaN(n));
@@ -73,6 +84,34 @@ export default function Page() {
     const v = (val || '').toLowerCase();
     if (!v) return '';
     return v.split('-').map((part) => part.charAt(0).toUpperCase() + part.slice(1)).join(' ');
+  };
+
+  const handleSummarize = async () => {
+    const u = (urlInput || '').trim();
+    if (!u) {
+      setSummarizeError('Please enter a valid URL.');
+      return;
+    }
+    setIsSummarizing(true);
+    setSummarizeError(null);
+    setSummaryResult(null);
+    try {
+      const res = await fetch('/api/summarize', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ url: u, agent: useAgent })
+      });
+      if (!res.ok) {
+        const msg = await res.json().catch(() => ({} as any));
+        throw new Error(msg?.error || `Request failed (${res.status})`);
+      }
+      const data = await res.json();
+      setSummaryResult(data);
+    } catch (e) {
+      setSummarizeError(e instanceof Error ? e.message : 'Failed to summarize URL');
+    } finally {
+      setIsSummarizing(false);
+    }
   };
 
   useEffect(() => {
@@ -203,9 +242,73 @@ export default function Page() {
         </div>
           </CardHeader>
 
-        {/* Filters Section */}
+        {/* URL Summarizer + Filters Section */}
           <CardContent id="mobile-filters" className={`pt-0 ${mobileFiltersOpen ? 'block' : 'hidden'} lg:block`}>
             <div className="space-y-3 sm:space-y-4">
+              {/* URL Summarizer Row */}
+              <div className="grid grid-cols-1 lg:grid-cols-6 gap-2 sm:gap-3 pb-3 border-b">
+                <div className="lg:col-span-6">
+                  <Label htmlFor="summarize-url" className="text-[13px] sm:text-sm font-medium">Summarize an article URL</Label>
+                  <div className="mt-1 flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+                    <Input
+                      id="summarize-url"
+                      className="flex-1 h-10 text-[15px]"
+                      placeholder="https://example.com/article"
+                      value={urlInput}
+                      onChange={(e) => setUrlInput(e.target.value)}
+                      aria-label="Article URL"
+                    />
+                    <label className="inline-flex items-center gap-2 text-sm text-muted-foreground select-none px-2">
+                      <input
+                        type="checkbox"
+                        className="h-4 w-4 rounded border-input text-primary"
+                        checked={useAgent}
+                        onChange={(e) => setUseAgent(e.target.checked)}
+                        aria-label="Use AI Agent"
+                      />
+                      <span>Use AI Agent</span>
+                    </label>
+                    <Button
+                      variant="default"
+                      onClick={handleSummarize}
+                      disabled={isSummarizing}
+                      aria-label="Summarize URL"
+                    >
+                      {isSummarizing ? 'Summarizing…' : 'Summarize'}
+                    </Button>
+                  </div>
+                  {summarizeError && (
+                    <div className="mt-2 text-sm text-red-600" role="alert">{summarizeError}</div>
+                  )}
+                  {summaryResult && (
+                    <div className="mt-3 p-3 rounded-md border bg-background">
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="min-w-0">
+                          <div className="text-sm text-muted-foreground mb-1">{summaryResult.method === 'agent' ? 'AI Agent Summary' : 'Heuristic Summary'}</div>
+                          <div className="font-semibold truncate" title={summaryResult.title}>{summaryResult.title}</div>
+                        </div>
+                        <span className="flex-shrink-0 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800" title={summaryResult.category}>
+                          {summaryResult.category}
+                        </span>
+                      </div>
+                      <p className="mt-2 text-sm text-foreground leading-relaxed whitespace-pre-wrap">{summaryResult.summary}</p>
+                      <a
+                        href={summaryResult.url}
+                        target="_blank"
+                        rel="noreferrer noopener"
+                        className="inline-flex items-center gap-1 text-sm text-blue-600 hover:text-blue-700 mt-2"
+                        aria-label="Open original article"
+                      >
+                        Open article
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                        </svg>
+                      </a>
+                    </div>
+                  )}
+                </div>
+              </div>
+
               {/* Main Filters Row */}
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-2 sm:gap-3">
             <div>
