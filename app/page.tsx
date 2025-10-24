@@ -1,6 +1,11 @@
 "use client";
 
 import { useEffect, useMemo, useState } from 'react';
+import { format } from 'date-fns';
+import { Calendar } from '@/components/ui/calendar';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Button } from '@/components/ui/button';
+import { Calendar as CalendarIcon } from 'lucide-react';
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -404,11 +409,41 @@ export default function Page() {
             </div>
             <div>
               <label className="block text-xs text-gray-600 mb-1 font-medium">Start</label>
-              <input type="month" className="w-full border border-gray-300 rounded-md px-2 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="2023-01" value={filters.startYm} onChange={e => setFilters(s => ({ ...s, startYm: e.target.value }))} />
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button variant="outline" className="w-full justify-start">
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {filters.startYm ? filters.startYm : 'YYYY-MM'}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent align="start" className="p-0">
+                  <Calendar
+                    mode="single"
+                    selected={filters.startYm ? new Date(filters.startYm + '-01') : undefined}
+                    onSelect={(d) => setFilters(s => ({ ...s, startYm: d ? format(d, 'yyyy-MM') : '' }))}
+                    initialFocus
+                  />
+                </PopoverContent>
+              </Popover>
             </div>
             <div>
               <label className="block text-xs text-gray-600 mb-1 font-medium">End</label>
-              <input type="month" className="w-full border border-gray-300 rounded-md px-2 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="2024-12" value={filters.endYm} onChange={e => setFilters(s => ({ ...s, endYm: e.target.value }))} />
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button variant="outline" className="w-full justify-start">
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {filters.endYm ? filters.endYm : 'YYYY-MM'}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent align="start" className="p-0">
+                  <Calendar
+                    mode="single"
+                    selected={filters.endYm ? new Date(filters.endYm + '-01') : undefined}
+                    onSelect={(d) => setFilters(s => ({ ...s, endYm: d ? format(d, 'yyyy-MM') : '' }))}
+                    initialFocus
+                  />
+                </PopoverContent>
+              </Popover>
             </div>
           </div>
           {(filters.section || filters.category || filters.q || filters.startYm || filters.endYm) && (
